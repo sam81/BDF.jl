@@ -1,0 +1,243 @@
+module jbdf
+
+export read_bdf, read_bdf_header
+
+function read_bdf(fname, from=0, to=-1)
+    #fname: file path
+    #from: start time in seconds, default is 0
+    #to: end time, default is the full duration
+    #returns data, trigChan, statusChan
+    fid = open(fname, "r")
+    idCodeNonASCII = read(fid, Uint8, 1)
+    idCode = ascii(read(fid, Uint8, 7))
+    subjID = ascii(read(fid, Uint8, 80))
+    recID = ascii(read(fid, Uint8, 80))
+    startDate = ascii(read(fid, Uint8, 8))
+    startTime = ascii(read(fid, Uint8, 8))
+    nBytes = int(ascii(read(fid, Uint8, 8)))
+    versionDataFormat = ascii(read(fid, Uint8, 44))
+    nDataRecords = int(ascii(read(fid, Uint8, 8)))
+    recordDuration = float(ascii(read(fid, Uint8, 8)))
+    nChannels = int(ascii(read(fid, Uint8, 4)))
+    chanLabels = Array(String, nChannels)
+    transducer = Array(String, nChannels)
+    physDim = Array(String, nChannels)
+    physMin = Array(Int, nChannels)
+    physMax = Array(Int, nChannels)
+    digMin = Array(Int, nChannels)
+    digMax = Array(Int, nChannels)
+    prefilt = Array(String, nChannels)
+    nSampRec = Array(Int, nChannels)
+    reserved = Array(String, nChannels)
+    scaleFactor = Array(Float64, nChannels)
+    sampRate = Array(Int, nChannels)
+
+    duration = recordDuration*nDataRecords
+
+    for i=1:nChannels
+        chanLabels[i] = strip(ascii(read(fid, Uint8, 16)))
+    end
+
+    for i=1:nChannels
+        transducer[i] = strip(ascii(read(fid, Uint8, 80)))
+    end
+
+    for i=1:nChannels
+        physDim[i] = strip(ascii(read(fid, Uint8, 8)))
+    end
+
+    for i=1:nChannels
+        physMin[i] = int(ascii(read(fid, Uint8, 8)))
+    end
+
+    for i=1:nChannels
+        physMax[i] = int(ascii(read(fid, Uint8, 8)))
+    end
+
+    for i=1:nChannels
+        digMin[i] = int(ascii(read(fid, Uint8, 8)))
+    end
+
+    for i=1:nChannels
+        digMax[i] = int(ascii(read(fid, Uint8, 8)))
+    end
+
+    for i=1:nChannels
+        prefilt[i] = strip(ascii(read(fid, Uint8, 80)))
+    end
+
+    for i=1:nChannels
+        nSampRec[i] = int(ascii(read(fid, Uint8, 8)))
+    end
+
+    for i=1:nChannels
+        reserved[i] = strip(ascii(read(fid, Uint8, 32)))
+    end
+
+    for i=1:nChannels
+        scaleFactor[i] = (physMax[i]-physMin[i])/(digMax[i]-digMin[i])
+        sampRate[i] = nSampRec[i]/recordDuration
+    end
+
+    if to < 1
+        to = nDataRecords
+    end
+    recordsToRead = to - from
+    data = Array(Int32, ((nChannels-1), (recordsToRead*nSampRec[1])))
+    trigChan = Array(Int16, recordsToRead*nSampRec[1])
+    statusChan = Array(Int16,  recordsToRead*nSampRec[1])
+
+ 
+    seek(fid, 3*from*nChannels*nSampRec[1])
+    x = read(fid, Uint8, 3*recordsToRead*nChannels*nSampRec[1])
+    pos = 1
+    for n=1:recordsToRead
+        for c=1:nChannels
+            if chanLabels[c] != "Status"
+                for s=1:nSampRec[1]
+                    data[c,(n-1)*nSampRec[1]+s] = ((int32(x[pos]) << 8) | (int32(x[pos+1]) << 16) | (int32(x[pos+2]) << 24) )>> 8
+                    pos = pos+3
+                end
+            else
+                for s=1:nSampRec[1]
+                    trigChan[(n-1)*nSampRec[1]+s] = ((uint16(x[pos])) | (uint16(x[pos+1]) << 8)) & 255
+                    statusChan[(n-1)*nSampRec[1]+s] = int16(x[pos+2])
+                    pos = pos+3
+                end
+            end
+        end
+    end
+
+    data=data*scaleFactor[1]
+    close(fid)
+
+    ## #event table
+    ## evtTab = {}
+    ## if event_table == True:
+    trigst = copy(trigChan)
+    trigst[find(diff(trigst) .== 0)+1] = 0
+    startPoints = find(trigst .!= 0)
+
+    trige = diff(trigChan)
+    stopPoints = find(trige .!= 0)
+    stopPoints = vcat(stopPoints, length(trigChan))
+    trigDurs = (stopPoints - startPoints)/sampRate[1]
+
+    evt = trigst[find(trigst .!= 0)]
+    evtTab = {"code" => evt,
+         "idx" => startPoints,
+         "dur" => trigDurs
+              }
+
+    return data, evtTab, trigChan, statusChan
+
+end
+
+
+
+function read_bdf_header(fileName)
+    fid = open(fileName, "r")
+    idCodeNonASCII = read(fid, Uint8, 1)
+    idCode = ascii(read(fid, Uint8, 7))
+    subjID = ascii(read(fid, Uint8, 80))
+    recID = ascii(read(fid, Uint8, 80))
+    startDate = ascii(read(fid, Uint8, 8))
+    startTime = ascii(read(fid, Uint8, 8))
+    nBytes = int(ascii(read(fid, Uint8, 8)))
+    versionDataFormat = ascii(read(fid, Uint8, 44))
+    nDataRecords = int(ascii(read(fid, Uint8, 8)))
+    recordDuration = float(ascii(read(fid, Uint8, 8)))
+    nChannels = int(ascii(read(fid, Uint8, 4)))
+    chanLabels = Array(String, nChannels)
+    transducer = Array(String, nChannels)
+    physDim = Array(String, nChannels)
+    physMin = Array(Int, nChannels)
+    physMax = Array(Int, nChannels)
+    digMin = Array(Int, nChannels)
+    digMax = Array(Int, nChannels)
+    prefilt = Array(String, nChannels)
+    nSampRec = Array(Int, nChannels)
+    reserved = Array(String, nChannels)
+    scaleFactor = Array(Float64, nChannels)
+    sampRate = Array(Int, nChannels)
+
+    duration = recordDuration*nDataRecords
+
+    for i=1:nChannels
+        chanLabels[i] = strip(ascii(read(fid, Uint8, 16)))
+    end
+
+    for i=1:nChannels
+        transducer[i] = strip(ascii(read(fid, Uint8, 80)))
+    end
+
+    for i=1:nChannels
+        physDim[i] = strip(ascii(read(fid, Uint8, 8)))
+    end
+
+    for i=1:nChannels
+        physMin[i] = int(ascii(read(fid, Uint8, 8)))
+    end
+
+    for i=1:nChannels
+        physMax[i] = int(ascii(read(fid, Uint8, 8)))
+    end
+
+    for i=1:nChannels
+        digMin[i] = int(ascii(read(fid, Uint8, 8)))
+    end
+
+    for i=1:nChannels
+        digMax[i] = int(ascii(read(fid, Uint8, 8)))
+    end
+
+    for i=1:nChannels
+        prefilt[i] = strip(ascii(read(fid, Uint8, 80)))
+    end
+
+    for i=1:nChannels
+        nSampRec[i] = int(ascii(read(fid, Uint8, 8)))
+    end
+
+    for i=1:nChannels
+        reserved[i] = strip(ascii(read(fid, Uint8, 32)))
+    end
+
+    for i=1:nChannels
+        scaleFactor[i] = (physMax[i]-physMin[i])/(digMax[i]-digMin[i])
+        sampRate[i] = nSampRec[i]/recordDuration
+    end
+
+    close(fid)
+
+    d = {"fileName" => fileName,
+         "idCodeNonASCII" => idCodeNonASCII,
+         "idCode" => idCode,
+         "subjID" => subjID,
+         "recID"  => recID,
+         "startDate" => startDate,
+         "startTime" => startTime,
+         "nBytes" => nBytes,
+         "versionDataFormat" => versionDataFormat,
+         "nDataRecords"  => nDataRecords,
+         "recordDuration" => recordDuration,
+         "nChannels"  => nChannels,
+         "chanLabels"  => chanLabels,
+         "transducer"  => transducer,
+         "physDim"=> physDim,
+         "physMin" => physMin,
+         "physMax" => physMax,
+         "digMin" => digMin,
+         "digMax" => digMax,
+         "prefilt" => prefilt,
+         "nSampRec" => nSampRec,
+         "reserved" => reserved,
+         "scaleFactor" => scaleFactor,
+         "sampRate" => sampRate,
+         "duration" => duration,
+         }
+    return(d)
+    
+end
+
+end # module
