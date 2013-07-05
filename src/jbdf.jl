@@ -1,12 +1,12 @@
 module jbdf
 
-export read_bdf, read_bdf_header
+export readBdf, readBdfHeader
 
-function read_bdf(fname, from=0, to=-1)
+function readBdf(fname::String; from::Real=0, to::Real=-1)
     #fname: file path
     #from: start time in seconds, default is 0
     #to: end time, default is the full duration
-    #returns data, trigChan, statusChan
+    #returns data, trigChan, statusChan, evtTab
     fid = open(fname, "r")
     idCodeNonASCII = read(fid, Uint8, 1)
     idCode = ascii(read(fid, Uint8, 7))
@@ -87,8 +87,8 @@ function read_bdf(fname, from=0, to=-1)
     trigChan = Array(Int16, recordsToRead*nSampRec[1])
     statusChan = Array(Int16,  recordsToRead*nSampRec[1])
 
- 
-    seek(fid, 3*from*nChannels*nSampRec[1])
+    
+    skip(fid, 3*from*nChannels*nSampRec[1])
     x = read(fid, Uint8, 3*recordsToRead*nChannels*nSampRec[1])
     pos = 1
     for n=1:recordsToRead
@@ -111,23 +111,16 @@ function read_bdf(fname, from=0, to=-1)
     data=data*scaleFactor[1]
     close(fid)
 
-    ## #event table
-    ## evtTab = {}
-    ## if event_table == True:
-    trigst = copy(trigChan)
-    trigst[find(diff(trigst) .== 0)+1] = 0
-    startPoints = find(trigst .!= 0)
 
-    trige = diff(trigChan)
-    stopPoints = find(trige .!= 0)
-    stopPoints = vcat(stopPoints, length(trigChan))
+    startPoints = vcat(1, find(diff(trigChan) .!= 0)+1)
+    stopPoints = vcat(find(diff(trigChan) .!= 0), length(trigChan))
     trigDurs = (stopPoints - startPoints)/sampRate[1]
 
-    evt = trigst[find(trigst .!= 0)]
-    evtTab = {"code" => evt,
-         "idx" => startPoints,
-         "dur" => trigDurs
-              }
+    evt = trigChan[startPoints]
+    evtTab = (String=>Any)["code" => evt,
+                           "idx" => startPoints,
+                           "dur" => trigDurs
+                           ]
 
     return data, evtTab, trigChan, statusChan
 
@@ -135,7 +128,7 @@ end
 
 
 
-function read_bdf_header(fileName)
+function readBdfHeader(fileName::String)
     fid = open(fileName, "r")
     idCodeNonASCII = read(fid, Uint8, 1)
     idCode = ascii(read(fid, Uint8, 7))
@@ -210,7 +203,7 @@ function read_bdf_header(fileName)
 
     close(fid)
 
-    d = {"fileName" => fileName,
+    d = (String => Any)["fileName" => fileName,
          "idCodeNonASCII" => idCodeNonASCII,
          "idCode" => idCode,
          "subjID" => subjID,
@@ -235,7 +228,7 @@ function read_bdf_header(fileName)
          "scaleFactor" => scaleFactor,
          "sampRate" => sampRate,
          "duration" => duration,
-         }
+         ]
     return(d)
     
 end
