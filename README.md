@@ -6,3 +6,7 @@ Usage:
     sampRate = bdfHeader["sampRate"][1] #get the sampling rate
     #read the data, the event table, the trigger channel and the status channel
     dats, evtTab, trigs, statusChan = readBdf("res1.bdf")
+
+Documentation is available here:
+
+https://jbdf.readthedocs.org/en/latest/
