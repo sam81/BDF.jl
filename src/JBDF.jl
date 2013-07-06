@@ -1,4 +1,4 @@
-module jbdf
+module JBDF
 
 export readBdf, readBdfHeader
 
