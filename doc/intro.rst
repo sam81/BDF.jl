@@ -4,7 +4,7 @@ Introduction
 ************
 :Author: Samuele Carcagno
 
-jbdf is a julia module to read BIOSEMI 24-bit BDF files.
+JBDF is a julia module to read BIOSEMI 24-bit BDF files.
 
 
 *************************
@@ -14,20 +14,20 @@ Download and Installation
 Download
 ========
 
-The source code of jbdf is hosted on
+The source code of JBDF is hosted on
 github:
 
-https://github.com/sam81/jbdf
+https://github.com/sam81/JBDF
 
 
-*****
+******
 Usage
-*****
+******
 Load the module::
 
-    using jbdf
+    using JBDF
 
-To read an entire bdf recording::
+To read an entire BDF recording::
 
     dats, evtTab, trigChan, statusChan = ("res1.bdf") 
 
@@ -38,7 +38,7 @@ You can also read only part of a recording, the following code will read the fir
     dats, evtTab, trigChan, statChan = ("res1.bdf", from=0, to=10) 
     
 
-The ``readBdfHeader`` function can be used to get information on the bdf recording::
+The ``readBdfHeader`` function can be used to get information on the BDF recording::
 
     bdfInfo = readBdfHeader("res1.bdf")
 
@@ -56,20 +56,20 @@ Get the channel labels::
     bdfInfo["chanLabels"]
 
 
-Beware that jybdf does not check that you have sufficient RAM to 
-read all the data in a bdf file. If you try to read a file that is
+Beware that JBDF does not check that you have sufficient RAM to 
+read all the data in a BDF file. If you try to read a file that is
 too big for your hardware, you system may become slow or unresponsive.
 Initially try reading only a small amount of data, and check how much
 RAM that uses. 
 
-*****
+******
 Bugs
-*****
+******
 
-Please, report any bugs on github https://github.com/sam81/jbdf/issues
+Please, report any bugs on github https://github.com/sam81/JBDF/issues
 
-Known issues
--------------
+Known Issues
+============
 
 None
 
@@ -79,96 +79,95 @@ Functions
 
 .. function:: readBdf(fname::String; from::Real=0, to::Real=-1)
    
-   Read the data from a bdf file
+   Read the data from a BDF file
    
    Args:
-       fname: Name of the bdf file to read.
-       
-       from: Start time of data chunk to read (seconds)
-
-       to: End time of data chunk to read (seconds)
+       fname: 
+          Name of the BDF file to read.
+       from: 
+          Start time of data chunk to read (seconds)
+       to: 
+          End time of data chunk to read (seconds).
 
    Returns:
-       dats: Array{Float32, 2}: 
-           nChannels X nDataPoints matrix containing the data
-  
-       eventTable: dictionary with three fields
-           - code:
-             trigger codes
-           - idx:
-             trigger indexes
-            - dur:
-              trigger durations
-
-       trigChannel : 
-           the raw trigger channel
+      dats: Array{Float32, 2}
+          nChannels X nDataPoints matrix containing the data
+      eventTable: dictionary with three fields
+          - code:
+            trigger codes
+          - idx:
+            trigger indexes
+          - dur:
+            trigger durations
+      trigChannel : 
+          the raw trigger channel  
+      syscodeChannel : 
+          the raw system codes channel     
       
-       syscodeChannel : 
-           the raw system codes channel
-          
-        
       Examples:
-
-          > dats, evtTab, trigChan, sysChan = readBdf("res1.bdf")
+          ``dats, evtTab, trigChan, sysChan = readBdf("res1.bdf")``
 
 .. function:: readBdfHeader(fname::String)
    
-   Read the headerof a bdf file
+   Read the headerof a BDF file
    
    Args:
-       fname: Name of the bdf file to read.
+       fname: Name of the BDF file to read.
 
    Returns:
        bdfInfo: dictionary with the following fields
-  
-	   idCode : str
+	   idCode : String
 	       Identification code
-	   subjId : str
+	   subjId : String
 	       Local subject identification
-	   recId : str
+	   recId : String
 	       Local recording identification
-	   startDate : str
+	   startDate : String
 	       Recording start date
-	   startTime : str
+	   startTime : String
 	       Recording start time
-	   nBytes : int
-	       Number of bytes occupied by the bdf header
-	   versionDataFormat : str
+	   nBytes : Int
+	       Number of bytes occupied by the BDF header
+	   versionDataFormat : String
 	       Version of data format
-	   nDataRecords : int
+	   nDataRecords : Int
 	       Number of data records "-1" if unknown
-	   recordDuration : float
+	   recordDuration : FloatingPoint
 	       Duration of a data record, in seconds
-	   nChannels : int
+	   nChannels : Int
 	       Number of channels in data record
-	   chanLabels : list of str
+	   chanLabels : Array{String,1}
 	       Channel labels
-	   transducer : list of str
+	   transducer : Array{String,1}
 	       Transducer type
-	   physDim : str
+	   physDim : String
 	       Physical dimension of channels
-	   physMin : list of int
+	   physMin : Array{Int64,1}
 	       Physical minimum in units of physical dimension
-	   physMax : list of int
+	   physMax : Array{Int64,1}
 	       Physical maximum in units of physical dimension
-	   digMin : list of int
+	   digMin : Array{Int64,1}
 	       Digital minimum
-	   digMax : list of int
+	   digMax : Array{Int64,1}
 	       Digital maximum
-	   prefilt : list of str
+	   prefilt : Array{String,1}
 	       Prefiltering
-	   nSampRec : list of int
+	   nSampRec : Array{Int64,1}
 	       Number of samples in each data record
-	   reserved : list of str
+	   reserved : Array{String,1}
 	       Reserved
 	   scaleFactor : list of floats
 	       Scaling factor for digital to physical dimension
-	   sampRate : list of int
+	   sampRate : Array{Int64,1}
 	       Recording sampling rate
-	   statusChanIdx : int
+	   statusChanIdx : Int
 	       Index of the status channel
-	   nDataChannels : int
+	   nDataChannels : Int
 	       Number of data channels containing data (rather than trigger codes)
-	   dataChanLabels : list of str
+	   dataChanLabels : Array{String,1}
 	       Labels of the channels containing data (rather than trigger codes)
+
+   Examples:
+       ``bdfInfo = readBdfHeader("res1.bdf")``
+       ``sampRate = = bdfInfo["sampRate"][1]``
 
