@@ -6,7 +6,7 @@ function readBdf(fname::String; from::Real=0, to::Real=-1)
     #fname: file path
     #from: start time in seconds, default is 0
     #to: end time, default is the full duration
-    #returns data, trigChan, statusChan, evtTab
+    #returns data, trigChan, sysCodeChan, evtTab
     fid = open(fname, "r")
     idCodeNonASCII = read(fid, Uint8, 1)
     idCode = ascii(read(fid, Uint8, 7))
@@ -85,7 +85,7 @@ function readBdf(fname::String; from::Real=0, to::Real=-1)
     recordsToRead = to - from
     data = Array(Int32, ((nChannels-1), (recordsToRead*nSampRec[1])))
     trigChan = Array(Int16, recordsToRead*nSampRec[1])
-    statusChan = Array(Int16,  recordsToRead*nSampRec[1])
+    sysCodeChan = Array(Int16,  recordsToRead*nSampRec[1])
 
     
     skip(fid, 3*from*nChannels*nSampRec[1])
@@ -101,7 +101,7 @@ function readBdf(fname::String; from::Real=0, to::Real=-1)
             else
                 for s=1:nSampRec[1]
                     trigChan[(n-1)*nSampRec[1]+s] = ((uint16(x[pos])) | (uint16(x[pos+1]) << 8)) & 255
-                    statusChan[(n-1)*nSampRec[1]+s] = int16(x[pos+2])
+                    sysCodeChan[(n-1)*nSampRec[1]+s] = int16(x[pos+2])
                     pos = pos+3
                 end
             end
@@ -122,7 +122,7 @@ function readBdf(fname::String; from::Real=0, to::Real=-1)
                            "dur" => trigDurs
                            ]
 
-    return data, evtTab, trigChan, statusChan
+    return data, evtTab, trigChan, sysCodeChan
 
 end
 
