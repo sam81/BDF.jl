@@ -108,8 +108,9 @@ Functions
       syscodeChannel : 
           the raw system codes channel     
       
-      Examples:
-          ``dats, evtTab, trigChan, sysChan = readBdf("res1.bdf")``
+   Examples::
+
+          dats, evtTab, trigChan, sysChan = readBdf("res1.bdf")
 
 .. function:: readBdfHeader(fname::String)
    
@@ -171,7 +172,8 @@ Functions
 	   dataChanLabels : Array{String,1}
 	       Labels of the channels containing data (rather than trigger codes)
 
-   Examples:
-       ``bdfInfo = readBdfHeader("res1.bdf")``
-       ``sampRate = = bdfInfo["sampRate"][1]``
+   Examples::
+       
+     bdfInfo = readBdfHeader("res1.bdf")
+     sampRate = bdfInfo["sampRate"][1]
 
