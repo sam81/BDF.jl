@@ -29,7 +29,7 @@ function readBdf(fname::String; from::Real=0, to::Real=-1)
     prefilt = Array(String, nChannels)
     nSampRec = Array(Int, nChannels)
     reserved = Array(String, nChannels)
-    scaleFactor = Array(Float64, nChannels)
+    scaleFactor = Array(Float32, nChannels)
     sampRate = Array(Int, nChannels)
 
     duration = recordDuration*nDataRecords
@@ -75,7 +75,7 @@ function readBdf(fname::String; from::Real=0, to::Real=-1)
     end
 
     for i=1:nChannels
-        scaleFactor[i] = (physMax[i]-physMin[i])/(digMax[i]-digMin[i])
+        scaleFactor[i] = float32((physMax[i]-physMin[i])/(digMax[i]-digMin[i]))
         sampRate[i] = nSampRec[i]/recordDuration
     end
 
@@ -107,7 +107,6 @@ function readBdf(fname::String; from::Real=0, to::Real=-1)
             end
         end
     end
-
     data=data*scaleFactor[1]
     close(fid)
 
@@ -151,7 +150,7 @@ function readBdfHeader(fileName::String)
     prefilt = Array(String, nChannels)
     nSampRec = Array(Int, nChannels)
     reserved = Array(String, nChannels)
-    scaleFactor = Array(Float64, nChannels)
+    scaleFactor = Array(Float32, nChannels)
     sampRate = Array(Int, nChannels)
 
     duration = recordDuration*nDataRecords
@@ -197,7 +196,7 @@ function readBdfHeader(fileName::String)
     end
 
     for i=1:nChannels
-        scaleFactor[i] = (physMax[i]-physMin[i])/(digMax[i]-digMin[i])
+        scaleFactor[i] = float32(physMax[i]-physMin[i])/(digMax[i]-digMin[i])
         sampRate[i] = nSampRec[i]/recordDuration
     end
 
