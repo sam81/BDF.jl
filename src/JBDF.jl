@@ -7,88 +7,27 @@ function readBdf(fname::String; from::Real=0, to::Real=-1)
     #from: start time in seconds, default is 0
     #to: end time, default is the full duration
     #returns data, trigChan, sysCodeChan, evtTab
+    bh = readBdfHeader(fname)
+    nSampRec = bh["nSampRec"]
+    scaleFactor = bh["scaleFactor"]
+    nDataRecords = bh["nDataRecords"]
+    nChannels = bh["nChannels"]
+    chanLabels = bh["chanLabels"]
+    sampRate = bh["sampRate"]
+    
     fid = open(fname, "r")
-    idCodeNonASCII = read(fid, Uint8, 1)
-    idCode = ascii(read(fid, Uint8, 7))
-    subjID = ascii(read(fid, Uint8, 80))
-    recID = ascii(read(fid, Uint8, 80))
-    startDate = ascii(read(fid, Uint8, 8))
-    startTime = ascii(read(fid, Uint8, 8))
-    nBytes = int(ascii(read(fid, Uint8, 8)))
-    versionDataFormat = ascii(read(fid, Uint8, 44))
-    nDataRecords = int(ascii(read(fid, Uint8, 8)))
-    recordDuration = float(ascii(read(fid, Uint8, 8)))
-    nChannels = int(ascii(read(fid, Uint8, 4)))
-    chanLabels = Array(String, nChannels)
-    transducer = Array(String, nChannels)
-    physDim = Array(String, nChannels)
-    physMin = Array(Int, nChannels)
-    physMax = Array(Int, nChannels)
-    digMin = Array(Int, nChannels)
-    digMax = Array(Int, nChannels)
-    prefilt = Array(String, nChannels)
-    nSampRec = Array(Int, nChannels)
-    reserved = Array(String, nChannels)
-    scaleFactor = Array(Float32, nChannels)
-    sampRate = Array(Int, nChannels)
-
-    duration = recordDuration*nDataRecords
-
-    for i=1:nChannels
-        chanLabels[i] = strip(ascii(read(fid, Uint8, 16)))
-    end
-
-    for i=1:nChannels
-        transducer[i] = strip(ascii(read(fid, Uint8, 80)))
-    end
-
-    for i=1:nChannels
-        physDim[i] = strip(ascii(read(fid, Uint8, 8)))
-    end
-
-    for i=1:nChannels
-        physMin[i] = int(ascii(read(fid, Uint8, 8)))
-    end
-
-    for i=1:nChannels
-        physMax[i] = int(ascii(read(fid, Uint8, 8)))
-    end
-
-    for i=1:nChannels
-        digMin[i] = int(ascii(read(fid, Uint8, 8)))
-    end
-
-    for i=1:nChannels
-        digMax[i] = int(ascii(read(fid, Uint8, 8)))
-    end
-
-    for i=1:nChannels
-        prefilt[i] = strip(ascii(read(fid, Uint8, 80)))
-    end
-
-    for i=1:nChannels
-        nSampRec[i] = int(ascii(read(fid, Uint8, 8)))
-    end
-
-    for i=1:nChannels
-        reserved[i] = strip(ascii(read(fid, Uint8, 32)))
-    end
-
-    for i=1:nChannels
-        scaleFactor[i] = float32((physMax[i]-physMin[i])/(digMax[i]-digMin[i]))
-        sampRate[i] = nSampRec[i]/recordDuration
-    end
-
     if to < 1
         to = nDataRecords
     end
     recordsToRead = to - from
+    
     data = Array(Int32, ((nChannels-1), (recordsToRead*nSampRec[1])))
     trigChan = Array(Int16, recordsToRead*nSampRec[1])
     sysCodeChan = Array(Int16,  recordsToRead*nSampRec[1])
 
     
-    skip(fid, 3*from*nChannels*nSampRec[1])
+    startPos = (nChannels+1)*256 + 3*from*nChannels*nSampRec[1]
+    skip(fid, startPos)
     x = read(fid, Uint8, 3*recordsToRead*nChannels*nSampRec[1])
     pos = 1
     for n=1:recordsToRead
