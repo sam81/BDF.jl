@@ -46,7 +46,7 @@ function readBdf(fname::String; from::Real=0, to::Real=-1)
             end
         end
     end
-    data=data*scaleFactor[1]
+    data = data*scaleFactor[1]
     close(fid)
 
 
@@ -82,10 +82,10 @@ function readBdfHeader(fileName::String)
     chanLabels = Array(String, nChannels)
     transducer = Array(String, nChannels)
     physDim = Array(String, nChannels)
-    physMin = Array(Int, nChannels)
-    physMax = Array(Int, nChannels)
-    digMin = Array(Int, nChannels)
-    digMax = Array(Int, nChannels)
+    physMin = Array(Int32, nChannels)
+    physMax = Array(Int32, nChannels)
+    digMin = Array(Int32, nChannels)
+    digMax = Array(Int32, nChannels)
     prefilt = Array(String, nChannels)
     nSampRec = Array(Int, nChannels)
     reserved = Array(String, nChannels)
