@@ -113,7 +113,7 @@ function readBdf(fname::String; from::Real=0, to::Real=-1)
     close(fid)
 
 
-    startPoints = vcat(1, find(diff(trigChan) .!= 0)+1)
+    startPoints = vcat(1, find(diff(trigChan) .!= 0).+1)
     stopPoints = vcat(find(diff(trigChan) .!= 0), length(trigChan))
     trigDurs = (stopPoints - startPoints)/sampRate[1]
 
