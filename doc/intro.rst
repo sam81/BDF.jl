@@ -17,6 +17,10 @@ Download
 The source code of JBDF is hosted on
 github: https://github.com/sam81/JBDF
 
+It can be installed through Julia using::
+
+    Pkg.clone("git://github.com/sam81/JBDF.jl.git")
+
 ******
 Usage
 ******
@@ -26,7 +30,7 @@ Load the module::
 
 To read an entire BDF recording::
 
-    dats, evtTab, trigChan, sysCodeChan = ("res1.bdf") 
+    dats, evtTab, trigChan, sysCodeChan = readBdf("res1.bdf")
 
 ``dats`` is the nChannelXnSamples matrix containing the data. Note that the 
 triggers are not contained in the ``dats`` matrix. The triggers can be retrieved 
