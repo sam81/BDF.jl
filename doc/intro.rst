@@ -43,7 +43,7 @@ Additional Biosemi status codes (like cm in/out-of range, battery low/OK) are re
 
 You can also read only part of a recording, the following code will read the first 10 seconds of the recording::
 
-    dats, evtTab, trigChan, statChan = ("res1.bdf", from=0, to=10) 
+    dats, evtTab, trigChan, statChan = readBdf("res1.bdf", from=0, to=10) 
     
 
 The ``readBdfHeader`` function can be used to get information on the BDF recording::
