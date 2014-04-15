@@ -17,6 +17,10 @@ Download
 The source code of JBDF is hosted on
 github: https://github.com/sam81/JBDF
 
+It can be installed through Julia using::
+
+    Pkg.clone("git://github.com/sam81/JBDF.jl.git")
+
 ******
 Usage
 ******
