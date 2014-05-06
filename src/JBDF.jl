@@ -84,7 +84,6 @@ function readBdf(fname::String; from::Real=0, to::Real=-1)
         to = nDataRecords
     end
     recordsToRead = to - from
-    
     data = Array(Int32, ((nChannels-1), (recordsToRead*nSampRec[1])))
     trigChan = Array(Int16, recordsToRead*nSampRec[1])
     sysCodeChan = Array(Int16,  recordsToRead*nSampRec[1])
