@@ -240,8 +240,23 @@ function writeBdf(fname::String, data, trigChan, statusChan, sampRate; subjID=""
                   physMin=[-262144 for i=1:size(data)[1]], physMax=[262144 for i=1:size(data)[1]],
                   prefilt=["" for i=1:size(data)[1]])
 
-    #todo check data values within physMin physMax range
-    # and check also trigs and status for the same
+    #check data values within physMin physMax range
+    for i=1:size(data)[1]
+        if (maximum(data[i,:]) > physMax[i]) | (minimum(data[i,:]) < physMin[i])
+            println("Data values exceed [physMin, physMax] range, exiting!")
+            return
+        end
+    end
+    # and check also trigs and status don't go over allowed range
+    if (maximum(trigChan) > 2^16-1) | (minimum(trigChan) < 0)
+        println("trigger values exceed allowed range [0, 65535] range, exiting!")
+        return
+    end
+    if (maximum(statusChan) > 2^8-1) | (minimum(statusChan) < 0)
+        println("status channel values exceed allowed range [0, 255] range, exiting!")
+        return
+    end
+    
     modulo = mod(size(data)[2], sampRate)
     if modulo == 0
         padSize = 0
