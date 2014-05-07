@@ -267,6 +267,8 @@ function writeBdf(fname::String, data, trigChan, statusChan, sampRate; subjID=""
     nSubjID = length(subjID)
     if nSubjID > 80
         println("subjID longer than 80 characters, truncating!")
+        subjID = subjID[1:80]
+        nSubjID = length(subjID)
     end
     for i=1:nSubjID
         write(fid, uint8(subjID[i]))
@@ -278,6 +280,8 @@ function writeBdf(fname::String, data, trigChan, statusChan, sampRate; subjID=""
     nRecID = length(recID)
     if nRecID > 80
         println("recID longer than 80 characters, truncating!")
+        recID = recID[1:80]
+        nRecID = length(recID)
     end
     for i=1:nRecID
         write(fid, uint8(recID[i]))
@@ -289,6 +293,8 @@ function writeBdf(fname::String, data, trigChan, statusChan, sampRate; subjID=""
     nStartDate = length(startDate)
     if nStartDate > 8
         println("startDate longer than 8 characters, truncating!")
+        startDate = startDate[1:8]
+        nStartDate = length(startDate)
     end
     for i=1:nStartDate
         write(fid, uint8(startDate[i]))
@@ -300,6 +306,8 @@ function writeBdf(fname::String, data, trigChan, statusChan, sampRate; subjID=""
     nStartTime = length(startTime)
     if nStartTime > 8
         println("startTime longer than 8 characters, truncating!")
+        startTime = startTime[1:8]
+        nStartTime = length(startTime)
     end
     for i=1:nStartTime
         write(fid, uint8(startTime[i]))
@@ -319,6 +327,8 @@ function writeBdf(fname::String, data, trigChan, statusChan, sampRate; subjID=""
     nVersionDataFormat = length(versionDataFormat)
     if nVersionDataFormat > 44
         println("versionDataFormat longer than 44 characters, truncating!")
+        versionDataFormat = versionDataFormat[1:44]
+        nVersionDataFormat = length(versionDataFormat)
     end
     for i=1:nVersionDataFormat
         write(fid, uint8(versionDataFormat[i]))
