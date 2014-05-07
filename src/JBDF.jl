@@ -1,6 +1,6 @@
 module JBDF
 
-export readBdf, readBdfHeader
+export readBdf, readBdfHeader, writeBdf
 
 function readBdf(fname::String; from::Real=0, to::Real=-1)
     #fname: file path
@@ -231,6 +231,316 @@ function readBdfHeader(fileName::String)
          ]
     return(d)
     
+end
+
+function writeBdf(fname::String, data, trigChan, statusChan, sampRate; subjID="",
+                  recID="", startDate="",  startTime="", versionDataFormat="24BIT",
+                  chanLabels=["" for i=1:size(data)[1]], transducer=["" for i=1:size(data)[1]],
+                  physDim=["" for i=1:size(data)[1]],
+                  physMin=[-262144 for i=1:size(data)[1]], physMax=[262144 for i=1:size(data)[1]],
+                  prefilt=["" for i=1:size(data)[1]])
+
+    #todo check data values within physMin physMax range
+    # and check also trigs and status for the same
+    modulo = mod(size(data)[2], sampRate)
+    if modulo == 0
+        padSize = 0
+    else
+        padSize = int(sampRate - modulo)
+    end
+    dats = hcat(data, zeros(eltype(data), size(data)[1], padSize))
+    trigs = vcat(trigChan, zeros(eltype(trigChan), padSize))
+    statChan = vcat(statusChan, zeros(eltype(statusChan), padSize))
+    ## dats = copy(data) #data are modified (scaled, converted to int) need to copy to avoid mofifying original data
+    ## trigs = copy(trigChan)
+    ## statChan = copy(statusChan)
+    nChannels = size(dats)[1] + 1
+    nSamples = size(dats)[2]
+    fid = open(fname, "w")
+    
+    write(fid, 0xff)
+    idCode = "BIOSEMI"
+    for i=1:length(idCode)
+        write(fid, uint8(idCode[i]))
+    end
+    #subjID
+    nSubjID = length(subjID)
+    if nSubjID > 80
+        println("subjID longer than 80 characters, truncating!")
+    end
+    for i=1:nSubjID
+        write(fid, uint8(subjID[i]))
+    end
+    for i=1:(80-nSubjID)
+        write(fid, char(' '))
+    end
+    #recID
+    nRecID = length(recID)
+    if nRecID > 80
+        println("recID longer than 80 characters, truncating!")
+    end
+    for i=1:nRecID
+        write(fid, uint8(recID[i]))
+    end
+    for i=1:(80-nRecID)
+        write(fid, char(' '))
+    end
+    #startDate
+    nStartDate = length(startDate)
+    if nStartDate > 8
+        println("startDate longer than 8 characters, truncating!")
+    end
+    for i=1:nStartDate
+        write(fid, uint8(startDate[i]))
+    end
+    for i=1:(8-nStartDate)
+        write(fid, char(' '))
+    end
+    #startTime
+    nStartTime = length(startTime)
+    if nStartTime > 8
+        println("startTime longer than 8 characters, truncating!")
+    end
+    for i=1:nStartTime
+        write(fid, uint8(startTime[i]))
+    end
+    for i=1:(8-nStartTime)
+        write(fid, char(' '))
+    end
+    #nBytes
+    nBytes = string((nChannels+1)*256)
+    for i=1:length(nBytes)
+        write(fid, uint8(nBytes[i]))
+    end
+    for i=1:(8-length(nBytes))
+        write(fid, char(' '))
+    end
+    #versionDataFormat
+    nVersionDataFormat = length(versionDataFormat)
+    if nVersionDataFormat > 44
+        println("versionDataFormat longer than 44 characters, truncating!")
+    end
+    for i=1:nVersionDataFormat
+        write(fid, uint8(versionDataFormat[i]))
+    end
+    for i=1:(44-nVersionDataFormat)
+        write(fid, char(' '))
+    end
+    #nDataRecords
+    nDataRecords = int(ceil(size(dats)[2]/sampRate))
+    nDataRecordsString = string(nDataRecords)
+    for i=1:length(nDataRecordsString)
+        write(fid, uint8(nDataRecordsString[i]))
+    end
+    for i=1:(8-length(nDataRecordsString))
+        write(fid, char(' '))
+    end
+    #recordDuration
+    recordDuration = "1       "
+    for i=1:length(recordDuration)
+        write(fid, uint8(recordDuration[i]))
+    end
+    #nChannels
+    nChannelsString = string(nChannels)
+    for i=1:length(nChannelsString)
+        write(fid, uint8(nChannelsString[i]))
+    end
+    for i=1:(4-length(nChannelsString))
+        write(fid, char(' '))
+    end
+    #chanLabels
+    if length(chanLabels) > nChannels -1
+        println("Number of chanLabels greater than number of channels, truncating!")
+        chanLabels = chanLabels[1:nChannels-1]
+    end
+    if length(chanLabels) < nChannels -1
+        #println("Warning: number of chanLabels less than number of channels!")
+        chanLabels = vcat(chanLabels, ["" for k=1:(nChannels-1)-length(chanLabels)])
+        
+    end
+    for j=1:length(chanLabels)
+        for i=1:length(chanLabels[j])
+            write(fid, uint8(chanLabels[j][i]))
+        end
+        for i=1:(16-length(chanLabels[j]))
+            write(fid, char(' '))
+        end
+    end
+    statusString = "Status"
+    for i=1:length(statusString)
+        write(fid, uint8(statusString[i]))
+    end
+    for i=1:(16-length(statusString))
+        write(fid, char(' '))
+    end
+
+    #transducer
+    if length(transducer) > nChannels -1
+        println("Number of transducer greater than number of channels, truncating!")
+        transducer = transducer[1:nChannels-1]
+    end
+    if length(transducer) < nChannels-1
+        #println("Warning: number of transducer less than number of channels!")
+        transducer = vcat(transducer, ["" for k=1:(nChannels-1)-length(transducer)])
+    end
+    for j=1:length(transducer)
+        for i=1:length(transducer[j])
+            write(fid, uint8(transducer[j][i]))
+        end
+        for i=1:(80-length(transducer[j]))
+            write(fid, char(' '))
+        end
+    end
+    trigStatusString = "Triggers and Status"
+    for i=1:length(trigStatusString)
+        write(fid, uint8(trigStatusString[i]))
+    end
+    for i=1:(80-length(trigStatusString))
+        write(fid, char(' '))
+    end
+
+    #physDim
+    if length(physDim) > nChannels-1
+        println("Number of physDim greater than number of channels, truncating!")
+        physDim = physDim[1:nChannels-1]
+    end
+    if length(physDim) < nChannels-1
+        #println("Warning: number of physDim less than number of channels!")
+        physDim = vcat(physDim, ["" for k=1:(nChannels-1)-length(physDim)])
+    end
+    for j=1:length(physDim)
+        for i=1:length(physDim[j])
+            write(fid, uint8(physDim[j][i]))
+        end
+        for i=1:(8-length(physDim[j]))
+            write(fid, char(' '))
+        end
+    end
+    boolString = "Boolean"
+    for i=1:length(boolString)
+        write(fid, uint8(boolString[i]))
+    end
+    for i=1:(8-length(boolString))
+        write(fid, char(' '))
+    end
+    if length(physMin) !=  nChannels-1
+        println("Length of physMin must match number of data channels, exiting!")
+        return
+    end
+    if length(physMax) !=  nChannels-1
+        println("Length of physMax must match number of data channels, exiting!")
+        return
+    end
+    physMin = vcat(physMin, -8388608)
+    physMax = vcat(physMax, 8388607)
+    digMin = [-8388608 for i=1:nChannels]
+    digMax = [8388607 for i=1:nChannels]
+    physMinString = [string(physMin[i]) for i=1:length(physMin)]
+    physMaxString = [string(physMax[i]) for i=1:length(physMax)]
+    digMinString = [string(digMin[i]) for i=1:length(digMin)]
+    digMaxString = [string(digMax[i]) for i=1:length(digMax)]
+    for j=1:length(physMinString)
+        for i=1:length(physMinString[j])
+            write(fid, uint8(physMinString[j][i]))
+        end
+        for i=1:(8-length(physMinString[j]))
+            write(fid, char(' '))
+        end
+    end
+    for j=1:length(physMaxString)
+        for i=1:length(physMaxString[j])
+            write(fid, uint8(physMaxString[j][i]))
+        end
+        for i=1:(8-length(physMaxString[j]))
+            write(fid, char(' '))
+        end
+    end
+    for j=1:length(digMinString)
+        for i=1:length(digMinString[j])
+            write(fid, uint8(digMinString[j][i]))
+        end
+        for i=1:(8-length(digMinString[j]))
+            write(fid, char(' '))
+        end
+    end
+    for j=1:length(digMaxString)
+        for i=1:length(digMaxString[j])
+            write(fid, uint8(digMaxString[j][i]))
+        end
+        for i=1:(8-length(digMaxString[j]))
+            write(fid, char(' '))
+        end
+    end
+    #prefilt
+    if length(prefilt) > nChannels-1
+        println("Number of prefilt greater than number of channels, truncating!")
+        prefilt = prefilt[1:nChannels-1]
+    end
+    if length(prefilt) < nChannels-1
+        #println("Warning: number of prefilt less than number of channels!")
+        prefilt = vcat(prefilt, ["" for k=1:(nChannels-1)-length(prefilt)])
+    end
+    for j=1:length(prefilt)
+        for i=1:length(prefilt[j])
+            write(fid, uint8(prefilt[j][i]))
+        end
+        for i=1:(80-length(prefilt[j]))
+            write(fid, char(' '))
+        end
+    end
+    noFiltString = "No filtering"
+    for i=1:length(noFiltString)
+        write(fid, uint8(noFiltString[i]))
+    end
+    for i=1:(80-length(noFiltString))
+        write(fid, char(' '))
+    end
+    #nSampRec
+    nSampRec = sampRate
+    nSampRecString = string(sampRate)
+    for j=1:nChannels
+        for i=1:length(nSampRecString)
+            write(fid, uint8(nSampRecString[i]))
+        end
+        for i=1:(8-length(nSampRecString))
+            write(fid, char(' '))
+        end
+    end
+    #reserved
+    for j=1:nChannels
+        for i=1:32
+            write(fid, char(' '))
+        end
+    end
+    scaleFactor = zeros(nChannels)
+    for i=1:nChannels
+        scaleFactor[i] = float32(physMax[i]-physMin[i])/(digMax[i]-digMin[i])
+    end
+    for i=1:nChannels-1
+        dats[i,:] = dats[i,:] /scaleFactor[i]
+    end
+   
+    dats = int32(dats) #need to pad dats
+    trigs = int16(trigs)
+    statChan = int16(statChan)
+    for n=1:nDataRecords
+        for c=1:nChannels
+            if c < nChannels
+                for s=1:nSampRec
+                    thisSample = dats[c,(n-1)*nSampRec+s]
+                    write(fid, uint8(thisSample));   write(fid, uint8(thisSample >> 8)); write(fid, uint8(thisSample >> 16));
+                end
+            else
+                for s=1:nSampRec
+                    thisTrig = trigs[(n-1)*nSampRec[1]+s]
+                    thisStatus = statChan[(n-1)*nSampRec[1]+s]
+                    write(fid, uint8(thisTrig)); write(fid, uint8(thisTrig >> 8)); write(fid, uint8(thisStatus));
+                end
+            end
+        end
+    end
+  
+    close(fid)
 end
 
 end # module
