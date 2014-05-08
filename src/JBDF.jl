@@ -243,18 +243,15 @@ function writeBdf(fname::String, data, trigChan, statusChan, sampRate; subjID=""
     #check data values within physMin physMax range
     for i=1:size(data)[1]
         if (maximum(data[i,:]) > physMax[i]) | (minimum(data[i,:]) < physMin[i])
-            println("Data values exceed [physMin, physMax] range, exiting!")
-            return
+            error("Data values exceed [physMin, physMax] range, exiting!")
         end
     end
     # and check also trigs and status don't go over allowed range
     if (maximum(trigChan) > 2^16-1) | (minimum(trigChan) < 0)
-        println("trigger values exceed allowed range [0, 65535] range, exiting!")
-        return
+        error("trigger values exceed allowed range [0, 65535] range, exiting!")
     end
     if (maximum(statusChan) > 2^8-1) | (minimum(statusChan) < 0)
-        println("status channel values exceed allowed range [0, 255] range, exiting!")
-        return
+        error("status channel values exceed allowed range [0, 255] range, exiting!")
     end
     
     modulo = mod(size(data)[2], sampRate)
@@ -449,12 +446,10 @@ function writeBdf(fname::String, data, trigChan, statusChan, sampRate; subjID=""
         write(fid, char(' '))
     end
     if length(physMin) !=  nChannels-1
-        println("Length of physMin must match number of data channels, exiting!")
-        return
+        error("Length of physMin must match number of data channels, exiting!")
     end
     if length(physMax) !=  nChannels-1
-        println("Length of physMax must match number of data channels, exiting!")
-        return
+        error("Length of physMax must match number of data channels, exiting!")
     end
     physMin = vcat(physMin, -8388608)
     physMax = vcat(physMax, 8388607)
