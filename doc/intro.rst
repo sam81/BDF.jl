@@ -181,3 +181,63 @@ Functions
      bdfInfo = readBdfHeader("res1.bdf")
      sampRate = bdfInfo["sampRate"][1]
 
+.. function:: writeBdf(fname::String, data, trigChan, statusChan, sampRate; subjID="", recID="", startDate="",  startTime="", versionDataFormat="24BIT", chanLabels=["" for i=1:size(data)[1]], transducer=["" for i=1:size(data)[1]], physDim=["" for i=1:size(data)[1]], physMin=[-262144 for i=1:size(data)[1]], physMax=[262144 for i=1:size(data)[1]], prefilt=["" for i=1:size(data)[1]])
+             
+
+   Write a BDF file
+   
+   Args:
+       fname: 
+          Name of the BDF file to write.
+       data: 
+          The nChannelsXnDataPoints array to be written to the BDF file
+       trigChan: 
+          The triggers to be written to the BDF file (1XnDataPoints)
+       statusChan:
+          The status channel codes to be written to the BDF file (1XnDataPoints)
+       sampRate:
+          The sampling rate of the recording
+       subjId:
+          Subject identifier (80 characters max)
+       recId:
+          Recording identifier (80 characters max)
+       startDate:
+          Start date in "dd.mm.yy" format
+       startTime:
+          Start time in "hh.mm.ss" format
+       versionDataFormat:
+          Version of data format
+       chanLabels:
+          Array of channel labels (1 for each channel)
+       transducer:
+          Array of transducer type (1 for each channel)
+       physDim:
+          Array of physical dimension of channels (1 for each channel)
+       physMin:
+          Array of physical minimum in units of physical dimension (1 for each channel)
+       physMax:
+          Array of physical maximum in units of physical dimension (1 for each channel)
+       prefilt:
+          Array of prefilter settings (1 for each channel)
+
+   Notes:
+      Only the first five arguments are required. The other arguments are optional and
+      the corresponding BDF fields will be left empty or filled with defaults arguments.
+      
+      Data records are written in 1-second units. If the number of data points passed to 
+      `writeBdf` is not an integer multiple of the sampling rate the data array, as well 
+      as the trigger and status channel arrays will be padded with zeros to fill the last 
+      data record before it is written to disk.
+      
+   Examples::
+          
+    sampRate = 2048
+    dats = rand(2, sampRate*10)
+    trigs = rand(1:255, sampRate*10)
+    statChan = rand(1:255, sampRate*10)
+    writeBdf("bdfRec.bdf", dats, trigs, statChan, sampRate)
+
+    #add date and time info
+    writeBdf("bdfRec.bdf", dats, trigs, statChan, sampRate, startDate="23.06.14",
+             startTime="10.18.19")
+
