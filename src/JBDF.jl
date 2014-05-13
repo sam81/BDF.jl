@@ -234,7 +234,7 @@ function readBdfHeader(fileName::String)
 end
 
 function writeBdf(fname::String, data, trigChan, statusChan, sampRate; subjID="",
-                  recID="", startDate="",  startTime="", versionDataFormat="24BIT",
+                  recID="", startDate=strftime("%d.%m.%y", time()),  startTime=strftime("%H.%M.%S", time()), versionDataFormat="24BIT",
                   chanLabels=["" for i=1:size(data)[1]], transducer=["" for i=1:size(data)[1]],
                   physDim=["" for i=1:size(data)[1]],
                   physMin=[-262144 for i=1:size(data)[1]], physMax=[262144 for i=1:size(data)[1]],
