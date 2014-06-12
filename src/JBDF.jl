@@ -7,8 +7,17 @@ function readBdf(fname::String; from::Real=0, to::Real=-1)
     #from: start time in seconds, default is 0
     #to: end time, default is the full duration
     #returns data, trigChan, sysCodeChan, evtTab
- 
-    fid = open(fname, "r")
+
+    readBdf(open(fname, "r"), from=from, to=to)
+end
+
+
+function readBdf(fid::IO; from::Real=0, to::Real=-1)
+
+    if isa(fid, IOBuffer)
+        fid.ptr = 1
+    end
+
     idCodeNonASCII = read(fid, Uint8, 1)
     idCode = ascii(read(fid, Uint8, 7))
     subjID = ascii(read(fid, Uint8, 80))
