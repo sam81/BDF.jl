@@ -4,7 +4,7 @@ Introduction
 ************
 :Author: Samuele Carcagno
 
-JBDF is a julia module to read BIOSEMI 24-bit BDF files.
+``BDF.jl`` is a julia module to read BIOSEMI 24-bit BDF files.
 
 
 *************************
@@ -14,19 +14,19 @@ Download and Installation
 Download
 ========
 
-The source code of JBDF is hosted on
-github: https://github.com/sam81/JBDF
+The source code of ``BDF.jl`` is hosted on
+github: https://github.com/sam81/BDF.jl
 
 It can be installed through Julia using::
 
-    Pkg.clone("git://github.com/sam81/JBDF.jl.git")
+    Pkg.clone("git://github.com/sam81/BDF.jl.git")
 
 ******
 Usage
 ******
 Load the module::
 
-    using JBDF
+    using BDF
 
 To read an entire BDF recording::
 
@@ -64,7 +64,7 @@ Get the channel labels::
     bdfInfo["chanLabels"]
 
 
-Beware that JBDF does not check that you have sufficient RAM to 
+Beware that ``BDF.jl`` does not check that you have sufficient RAM to 
 read all the data in a BDF file. If you try to read a file that is
 too big for your hardware, your system may become slow or unresponsive.
 Initially try reading only a small amount of data, and check how much
@@ -74,7 +74,7 @@ RAM that uses.
 Bugs
 ******
 
-Please, report any bugs on github https://github.com/sam81/JBDF/issues
+Please, report any bugs on github https://github.com/sam81/BDF.jl/issues
 
 Known Issues
 ============

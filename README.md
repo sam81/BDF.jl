@@ -1,4 +1,4 @@
-JBDF is a julia module to read BIOSEMI 24-bit BDF files (used for storing electroencephalographic recordings)
+`BDF.jl` is a Julia module to read/write BIOSEMI 24-bit [BDF](http://www.biosemi.com/faq/file_format.htm) files (used for storing electroencephalographic recordings)
 
 Usage:
 
