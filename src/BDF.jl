@@ -1,4 +1,4 @@
-module JBDF
+module BDF
 
 export readBdf, readBdfHeader, writeBdf, splitBdfAtTrigger
 
