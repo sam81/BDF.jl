@@ -1,18 +1,18 @@
 module BDF
 
-export readBdf, readBdfHeader, writeBdf, splitBdfAtTrigger
+export readBDF, readBDFHeader, writeBDF, splitBDFAtTrigger
 
-function readBdf(fname::String; from::Real=0, to::Real=-1)
+function readBDF(fname::String; from::Real=0, to::Real=-1)
     #fname: file path
     #from: start time in seconds, default is 0
     #to: end time, default is the full duration
     #returns data, trigChan, sysCodeChan, evtTab
 
-    readBdf(open(fname, "r"), from=from, to=to)
+    readBDF(open(fname, "r"), from=from, to=to)
 end
 
 
-function readBdf(fid::IO; from::Real=0, to::Real=-1)
+function readBDF(fid::IO; from::Real=0, to::Real=-1)
 
     if isa(fid, IOBuffer)
         fid.ptr = 1
@@ -137,7 +137,7 @@ end
 
 
 
-function readBdfHeader(fileName::String)
+function readBDFHeader(fileName::String)
     fid = open(fileName, "r")
     idCodeNonASCII = read(fid, Uint8, 1)
     idCode = ascii(read(fid, Uint8, 7))
@@ -242,7 +242,7 @@ function readBdfHeader(fileName::String)
     
 end
 
-function writeBdf(fname::String, data, trigChan, statusChan, sampRate; subjID="",
+function writeBDF(fname::String, data, trigChan, statusChan, sampRate; subjID="",
                   recID="", startDate=strftime("%d.%m.%y", time()),  startTime=strftime("%H.%M.%S", time()), versionDataFormat="24BIT",
                   chanLabels=["" for i=1:size(data)[1]], transducer=["" for i=1:size(data)[1]],
                   physDim=["" for i=1:size(data)[1]],
@@ -572,10 +572,10 @@ function writeBdf(fname::String, data, trigChan, statusChan, sampRate; subjID=""
     close(fid)
 end
 
-function splitBdfAtTrigger(fname::String, trigger::Int; from::Real=0, to::Real=-1)
+function splitBDFAtTrigger(fname::String, trigger::Int; from::Real=0, to::Real=-1)
 
-    data, evtTab, trigChan, sysCodeChan = readBdf(fname, from=from, to=to)
-    origHeader = readBdfHeader(fname)
+    data, evtTab, trigChan, sysCodeChan = readBDF(fname, from=from, to=to)
+    origHeader = readBDFHeader(fname)
     sampRate = origHeader["sampRate"][1] #assuming sampling rate is the same for all channels
     sepPoints = evtTab["idx"][find(evtTab["code"] .== trigger)]
     nChunks = length(sepPoints)+1
@@ -588,7 +588,7 @@ function splitBdfAtTrigger(fname::String, trigger::Int; from::Real=0, to::Real=-
         thisTrigChan = trigChan[startPoints[i]: stopPoints[i]]
         thisSysCodeChan = sysCodeChan[startPoints[i]: stopPoints[i]]
 
-        writeBdf(thisFname, thisData, thisTrigChan, thisSysCodeChan, sampRate; subjID=origHeader["subjID"],
+        writeBDF(thisFname, thisData, thisTrigChan, thisSysCodeChan, sampRate; subjID=origHeader["subjID"],
              recID=origHeader["recID"], startDate=strftime("%d.%m.%y", time()),  startTime=strftime("%H.%M.%S", time()), versionDataFormat="24BIT",
              chanLabels=origHeader["chanLabels"][1:end-1], transducer=origHeader["transducer"][1:end-1],
              physDim=origHeader["physDim"][1:end-1],

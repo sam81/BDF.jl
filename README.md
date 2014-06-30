@@ -2,10 +2,10 @@
 
 Usage:
 
-    bdfHeader = readBdfHeader("res1.bdf") #read the bdf header
+    bdfHeader = readBDFHeader("res1.bdf") #read the bdf header
     sampRate = bdfHeader["sampRate"][1] #get the sampling rate
     #read the data, the event table, the trigger channel and the status channel
-    dats, evtTab, trigs, statusChan = readBdf("res1.bdf")
+    dats, evtTab, trigs, statusChan = readBDF("res1.bdf")
 
 Documentation is available here:
 

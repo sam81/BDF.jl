@@ -17,9 +17,9 @@ Download
 The source code of ``BDF.jl`` is hosted on
 github: https://github.com/sam81/BDF.jl
 
-It can be installed through Julia using::
+It can be installed in Julia using::
 
-    Pkg.clone("git://github.com/sam81/BDF.jl.git")
+    Pkg.add("BDF")
 
 ******
 Usage
@@ -30,7 +30,7 @@ Load the module::
 
 To read an entire BDF recording::
 
-    dats, evtTab, trigChan, sysCodeChan = readBdf("res1.bdf")
+    dats, evtTab, trigChan, sysCodeChan = readBDF("res1.bdf")
 
 ``dats`` is the nChannelXnSamples matrix containing the data. Note that the 
 triggers are not contained in the ``dats`` matrix. The triggers can be retrieved 
@@ -39,16 +39,16 @@ The eventTable is a dictionary containing the trigger codes ``evtTab["code"]``,
 the trigger indexes ``evtTab["idx"]`` (i.e. the sample numbers at which triggers 
 occurred in the recording), and the trigger durations ``evtTab["dur"]`` (in seconds). 
 The raw trigger channel returned in ``trigChan`` contains the trigger code for each recording sample. 
-Additional Biosemi status codes (like cm in/out-of range, battery low/OK) are returned in ``sysCodeChan``.
+Additional Biosemi status codes (like CM in/out-of range, battery low/OK) are returned in ``sysCodeChan``.
 
 You can also read only part of a recording, the following code will read the first 10 seconds of the recording::
 
-    dats, evtTab, trigChan, statChan = readBdf("res1.bdf", from=0, to=10) 
+    dats, evtTab, trigChan, statChan = readBDF("res1.bdf", from=0, to=10) 
     
 
-The ``readBdfHeader`` function can be used to get information on the BDF recording::
+The ``readBDFHeader`` function can be used to get information on the BDF recording::
 
-    bdfInfo = readBdfHeader("res1.bdf")
+    bdfInfo = readBDFHeader("res1.bdf")
 
 
 Get the duration of the recording::
@@ -79,13 +79,15 @@ Please, report any bugs on github https://github.com/sam81/BDF.jl/issues
 Known Issues
 ============
 
-None
+No particular attention has been given to decoding the information stored in the
+``sysCodeChan`` (like CM in/out-of range, battery low/OK), suggestions on how to 
+handle this are welcome.
 
 *********
 Functions
 *********
 
-.. function:: readBdf(fname::String; from::Real=0, to::Real=-1)
+.. function:: readBDF(fname::String; from::Real=0, to::Real=-1)
    
    Read the data from a BDF file
    
@@ -114,9 +116,9 @@ Functions
       
    Examples::
 
-          dats, evtTab, trigChan, sysChan = readBdf("res1.bdf")
+          dats, evtTab, trigChan, sysChan = readBDF("res1.bdf")
 
-.. function:: readBdfHeader(fname::String)
+.. function:: readBDFHeader(fname::String)
    
    Read the headerof a BDF file
    
@@ -178,10 +180,10 @@ Functions
 
    Examples::
        
-     bdfInfo = readBdfHeader("res1.bdf")
+     bdfInfo = readBDFHeader("res1.bdf")
      sampRate = bdfInfo["sampRate"][1]
 
-.. function:: writeBdf(fname::String, data, trigChan, statusChan, sampRate; subjID="", recID="", startDate="",  startTime="", versionDataFormat="24BIT", chanLabels=["" for i=1:size(data)[1]], transducer=["" for i=1:size(data)[1]], physDim=["" for i=1:size(data)[1]], physMin=[-262144 for i=1:size(data)[1]], physMax=[262144 for i=1:size(data)[1]], prefilt=["" for i=1:size(data)[1]])
+.. function:: writeBDF(fname::String, data, trigChan, statusChan, sampRate; subjID="", recID="", startDate="",  startTime="", versionDataFormat="24BIT", chanLabels=["" for i=1:size(data)[1]], transducer=["" for i=1:size(data)[1]], physDim=["" for i=1:size(data)[1]], physMin=[-262144 for i=1:size(data)[1]], physMax=[262144 for i=1:size(data)[1]], prefilt=["" for i=1:size(data)[1]])
              
 
    Write a BDF file
@@ -225,7 +227,7 @@ Functions
       the corresponding BDF fields will be left empty or filled with defaults arguments.
       
       Data records are written in 1-second units. If the number of data points passed to 
-      `writeBdf` is not an integer multiple of the sampling rate the data array, as well 
+      ``writeBDF`` is not an integer multiple of the sampling rate the data array, as well 
       as the trigger and status channel arrays will be padded with zeros to fill the last 
       data record before it is written to disk.
       
@@ -235,9 +237,22 @@ Functions
     dats = rand(2, sampRate*10)
     trigs = rand(1:255, sampRate*10)
     statChan = rand(1:255, sampRate*10)
-    writeBdf("bdfRec.bdf", dats, trigs, statChan, sampRate)
+    writeBDF("bdfRec.bdf", dats, trigs, statChan, sampRate)
 
     #add date and time info
-    writeBdf("bdfRec.bdf", dats, trigs, statChan, sampRate, startDate="23.06.14",
+    writeBDF("bdfRec.bdf", dats, trigs, statChan, sampRate, startDate="23.06.14",
              startTime="10.18.19")
 
+.. function:: splitBDFAtTrigger(fname::String, trigger::Int; from::Real=0, to::Real=-1)
+
+   Split a BDF file at points marked by a trigger into multiple files
+   
+   Args:
+       fname: 
+          Name of the BDF file to split.
+       trigger: 
+          The trigger marking the split points.
+       from:
+          Start time of data chunk to read (seconds).
+       to: 
+          End time of data chunk to read (seconds).
