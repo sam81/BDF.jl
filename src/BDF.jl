@@ -1,6 +1,6 @@
 module BDF
 
-export readBDF, readBDFHeader, writeBDF, splitBDFAtTrigger
+export readBDF, readBDFHeader, writeBDF, splitBDFAtTime, splitBDFAtTrigger
 
 function readBDF(fname::String; from::Real=0, to::Real=-1)
     #fname: file path
@@ -579,6 +579,36 @@ function splitBDFAtTrigger(fname::String, trigger::Int; from::Real=0, to::Real=-
     sampRate = origHeader["sampRate"][1] #assuming sampling rate is the same for all channels
     sepPoints = evtTab["idx"][find(evtTab["code"] .== trigger)]
     nChunks = length(sepPoints)+1
+    startPoints = [1, sepPoints]
+    stopPoints = [sepPoints.+1, size(data)[2]]
+
+    for i=1:nChunks
+        thisFname = string(split(fname, ".")[1], "_", i, ".", split(fname, ".")[2])
+        thisData = data[:, startPoints[i]: stopPoints[i]]
+        thisTrigChan = trigChan[startPoints[i]: stopPoints[i]]
+        thisSysCodeChan = sysCodeChan[startPoints[i]: stopPoints[i]]
+
+        writeBDF(thisFname, thisData, thisTrigChan, thisSysCodeChan, sampRate; subjID=origHeader["subjID"],
+             recID=origHeader["recID"], startDate=strftime("%d.%m.%y", time()),  startTime=strftime("%H.%M.%S", time()), versionDataFormat="24BIT",
+             chanLabels=origHeader["chanLabels"][1:end-1], transducer=origHeader["transducer"][1:end-1],
+             physDim=origHeader["physDim"][1:end-1],
+             physMin=origHeader["physMin"][1:end-1], physMax=origHeader["physMax"][1:end-1],
+             prefilt=origHeader["prefilt"][1:end-1])
+    end
+end
+
+function splitBDFAtTime(fname::String, timeSeconds; from::Real=0, to::Real=-1)
+
+    data, evtTab, trigChan, sysCodeChan = readBDF(fname, from=from, to=to)
+    origHeader = readBDFHeader(fname)
+    sampRate = origHeader["sampRate"][1] #assuming sampling rate is the same for all channels
+    sepPoints = int(round(sampRate.*timeSeconds))
+    for i=1:length(sepPoints)
+        if sepPoints[i] > size(data)[2]
+            error("Split point exceeds data points")
+        end
+    end
+    nChunks = length(timeSeconds)+1
     startPoints = [1, sepPoints]
     stopPoints = [sepPoints.+1, size(data)[2]]
 

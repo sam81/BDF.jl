@@ -256,3 +256,30 @@ Functions
           Start time of data chunk to read (seconds).
        to: 
           End time of data chunk to read (seconds).
+
+   Examples::
+ 
+     splitBDFAtTrigger("res1.bdf", 202)
+
+
+.. function:: splitBDFAtTime(fname::String, timeSeconds; from::Real=0, to::Real=-1)
+
+   Split a BDF file at one or more time points into multiple files
+   
+   Args:
+       fname: 
+          Name of the BDF file to split.
+       timeSeconds: 
+          The time(s) at which the BDF file should be split, in seconds. 
+          This can be either a single number or an array of time points.
+       from:
+          Start time of data chunk to read (seconds).
+       to: 
+          End time of data chunk to read (seconds).
+
+   Examples::
+ 
+     splitBDFAtTime("res1.bdf", 50)
+     splitBDFAtTime("res2.bdf", [50, 100, 150])
+
+
