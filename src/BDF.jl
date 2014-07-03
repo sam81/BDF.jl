@@ -500,6 +500,7 @@ function writeBDF(fname::String, data, trigChan, statusChan, sampRate; subjID=""
             write(fid, char(' '))
         end
     end
+
     #prefilt
     if length(prefilt) > nChannels-1
         println("Number of prefilt greater than number of channels, truncating!")
@@ -524,6 +525,7 @@ function writeBDF(fname::String, data, trigChan, statusChan, sampRate; subjID=""
     for i=1:(80-length(noFiltString))
         write(fid, char(' '))
     end
+
     #nSampRec
     nSampRec = sampRate
     nSampRecString = string(sampRate)
@@ -535,6 +537,7 @@ function writeBDF(fname::String, data, trigChan, statusChan, sampRate; subjID=""
             write(fid, char(' '))
         end
     end
+
     #reserved
     for j=1:nChannels
         reservedString = "Reserved"
@@ -585,7 +588,7 @@ function splitBDFAtTrigger(fname::String, trigger::Int; from::Real=0, to::Real=-
     sepPoints = evtTab["idx"][find(evtTab["code"] .== trigger)]
     nChunks = length(sepPoints)+1
     startPoints = [1,         sepPoints.+1]
-    stopPoints =  [sepPoints, size(data)[2]]
+    stopPoints =  [sepPoints, size(data)[2]] 
     
     for i=1:nChunks
         thisFname = string(split(fname, ".")[1], "_", i, ".", split(fname, ".")[2])
