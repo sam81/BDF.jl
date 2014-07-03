@@ -1,1 +1,4 @@
-include("test1.jl") 
+include("test_read_write.jl")
+include("test_split_trigger.jl") 
+include("test_split_time1.jl")
+include("test_split_time2.jl") 

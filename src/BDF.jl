@@ -536,11 +536,6 @@ function writeBDF(fname::String, data, trigChan, statusChan, sampRate; subjID=""
         end
     end
     #reserved
-    ## for j=1:nChannels
-    ##     for i=1:32
-    ##         write(fid, char(' '))
-    ##     end
-    ## end
     for j=1:nChannels
         reservedString = "Reserved"
         for i=1:length(reservedString)
@@ -589,9 +584,9 @@ function splitBDFAtTrigger(fname::String, trigger::Int; from::Real=0, to::Real=-
     sampRate = origHeader["sampRate"][1] #assuming sampling rate is the same for all channels
     sepPoints = evtTab["idx"][find(evtTab["code"] .== trigger)]
     nChunks = length(sepPoints)+1
-    startPoints = [1, sepPoints]
-    stopPoints = [sepPoints.+1, size(data)[2]]
-
+    startPoints = [1,         sepPoints.+1]
+    stopPoints =  [sepPoints, size(data)[2]]
+    
     for i=1:nChunks
         thisFname = string(split(fname, ".")[1], "_", i, ".", split(fname, ".")[2])
         thisData = data[:, startPoints[i]: stopPoints[i]]
@@ -619,8 +614,8 @@ function splitBDFAtTime(fname::String, timeSeconds; from::Real=0, to::Real=-1)
         end
     end
     nChunks = length(timeSeconds)+1
-    startPoints = [1, sepPoints]
-    stopPoints = [sepPoints.+1, size(data)[2]]
+    startPoints = [1,         sepPoints.+1]
+    stopPoints =  [sepPoints, size(data)[2]]
 
     for i=1:nChunks
         thisFname = string(split(fname, ".")[1], "_", i, ".", split(fname, ".")[2])
