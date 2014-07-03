@@ -536,11 +536,21 @@ function writeBDF(fname::String, data, trigChan, statusChan, sampRate; subjID=""
         end
     end
     #reserved
+    ## for j=1:nChannels
+    ##     for i=1:32
+    ##         write(fid, char(' '))
+    ##     end
+    ## end
     for j=1:nChannels
-        for i=1:32
+        reservedString = "Reserved"
+        for i=1:length(reservedString)
+            write(fid, uint8(reservedString[i]))
+        end
+        for i=1:(32-length(reservedString))
             write(fid, char(' '))
         end
     end
+
     scaleFactor = zeros(nChannels)
     for i=1:nChannels
         scaleFactor[i] = float32(physMax[i]-physMin[i])/(digMax[i]-digMin[i])
