@@ -1,5 +1,7 @@
 module BDF
 
+using Compat
+
 export readBDF, readBDFHeader, writeBDF, splitBDFAtTime, splitBDFAtTrigger
 
 function readBDF(fname::String; from::Real=0, to::Real=-1)
@@ -126,10 +128,10 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1)
     trigDurs = (stopPoints - startPoints)/sampRate[1]
 
     evt = trigChan[startPoints]
-    evtTab = (String=>Any)["code" => evt,
-                           "idx" => startPoints,
-                           "dur" => trigDurs
-                           ]
+    @compat evtTab = Dict{String,Any}("code" => evt,
+                                      "idx" => startPoints,
+                                      "dur" => trigDurs
+                                      )
 
     return data, evtTab, trigChan, sysCodeChan
 
@@ -212,32 +214,32 @@ function readBDFHeader(fileName::String)
 
     close(fid)
 
-    d = (String => Any)["fileName" => fileName,
-         "idCodeNonASCII" => idCodeNonASCII,
-         "idCode" => idCode,
-         "subjID" => subjID,
-         "recID"  => recID,
-         "startDate" => startDate,
-         "startTime" => startTime,
-         "nBytes" => nBytes,
-         "versionDataFormat" => versionDataFormat,
-         "nDataRecords"  => nDataRecords,
-         "recordDuration" => recordDuration,
-         "nChannels"  => nChannels,
-         "chanLabels"  => chanLabels,
-         "transducer"  => transducer,
-         "physDim"=> physDim,
-         "physMin" => physMin,
-         "physMax" => physMax,
-         "digMin" => digMin,
-         "digMax" => digMax,
-         "prefilt" => prefilt,
-         "nSampRec" => nSampRec,
-         "reserved" => reserved,
-         "scaleFactor" => scaleFactor,
-         "sampRate" => sampRate,
-         "duration" => duration,
-         ]
+@compat d = Dict{String,Any}("fileName" => fileName,
+                             "idCodeNonASCII" => idCodeNonASCII,
+                             "idCode" => idCode,
+                             "subjID" => subjID,
+                             "recID"  => recID,
+                             "startDate" => startDate,
+                             "startTime" => startTime,
+                             "nBytes" => nBytes,
+                             "versionDataFormat" => versionDataFormat,
+                             "nDataRecords"  => nDataRecords,
+                             "recordDuration" => recordDuration,
+                             "nChannels"  => nChannels,
+                             "chanLabels"  => chanLabels,
+                             "transducer"  => transducer,
+                             "physDim"=> physDim,
+                             "physMin" => physMin,
+                             "physMax" => physMax,
+                             "digMin" => digMin,
+                             "digMax" => digMax,
+                             "prefilt" => prefilt,
+                             "nSampRec" => nSampRec,
+                             "reserved" => reserved,
+                             "scaleFactor" => scaleFactor,
+                             "sampRate" => sampRate,
+                             "duration" => duration,
+                             )
     return(d)
     
 end
