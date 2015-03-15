@@ -1,0 +1,6 @@
+site_name: BDF.jl
+theme: readthedocs
+pages:
+    - ['index.md', 'Introduction']
+    - ['API.md', 'Function Reference']
+
