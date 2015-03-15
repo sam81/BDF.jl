@@ -355,7 +355,7 @@ writeBDF("bdfRec.bdf", dats, trigs, statChan, sampRate, startDate="23.06.14",
 startTime="10.18.19")
 ```
 """ ->
-function writeBDF(fname::String, data, trigChan, statusChan, sampRate; subjID="",
+function writeBDF(fname::String, data, trigChan, statusChan, sampRate::Integer; subjID="",
                   recID="", startDate=strftime("%d.%m.%y", time()),  startTime=strftime("%H.%M.%S", time()), versionDataFormat="24BIT",
                   chanLabels=["" for i=1:size(data)[1]], transducer=["" for i=1:size(data)[1]],
                   physDim=["" for i=1:size(data)[1]],
@@ -709,7 +709,7 @@ Split a BDF file at points marked by a trigger into multiple files
 splitBDFAtTrigger("res1.bdf", 202)
 ```
 """ ->
-function splitBDFAtTrigger(fname::String, trigger::Int; from::Real=0, to::Real=-1)
+function splitBDFAtTrigger(fname::String, trigger::Integer; from::Real=0, to::Real=-1)
 
     data, evtTab, trigChan, sysCodeChan = readBDF(fname, from=from, to=to)
     origHeader = readBDFHeader(fname)
@@ -740,7 +740,7 @@ Split a BDF file at one or more time points into multiple files
 ##### Args:
 
 * `fname`: Name of the BDF file to split.
-* `timeSeconds`: The time(s) at which the BDF file should be split, in seconds. 
+* `timeSeconds`: array listing the time(s) at which the BDF file should be split, in seconds. 
   This can be either a single number or an array of time points.
 * `from`: Start time of data chunk to read (seconds).
 * `to`: End time of data chunk to read (seconds).

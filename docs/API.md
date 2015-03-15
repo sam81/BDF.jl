@@ -87,7 +87,7 @@ Split a BDF file at one or more time points into multiple files
 ##### Args:
 
 * `fname`: Name of the BDF file to split.
-* `timeSeconds`: The time(s) at which the BDF file should be split, in seconds. 
+* `timeSeconds`: array listing the time(s) at which the BDF file should be split, in seconds. 
   This can be either a single number or an array of time points.
 * `from`: Start time of data chunk to read (seconds).
 * `to`: End time of data chunk to read (seconds).
@@ -105,7 +105,7 @@ splitBDFAtTime("res2.bdf", [50, 100, 150])
 
 ---
 
-#### splitBDFAtTrigger(fname::String, trigger::Int64)
+#### splitBDFAtTrigger(fname::String, trigger::Integer)
 Split a BDF file at points marked by a trigger into multiple files
    
 ##### Args:
@@ -127,7 +127,7 @@ splitBDFAtTrigger("res1.bdf", 202)
 
 ---
 
-#### writeBDF(fname::String, data, trigChan, statusChan, sampRate)
+#### writeBDF(fname::String, data, trigChan, statusChan, sampRate::Integer)
 Write a BDF file
    
 ##### Args:
