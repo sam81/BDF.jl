@@ -81,7 +81,7 @@ sampRate = bdfInfo["sampRate"][1]
 
 ---
 
-#### splitBDFAtTime(fname::String, timeSeconds)
+#### splitBDFAtTime{T<:Real}(fname::String, timeSeconds::Union(AbstractArray{T<:Real, 1}, T<:Real))
 Split a BDF file at one or more time points into multiple files
    
 ##### Args:
@@ -101,7 +101,7 @@ splitBDFAtTime("res2.bdf", [50, 100, 150])
 
 
 **source:**
-[BDF/src/BDF.jl:754](file:///home/sam/.julia/v0.3/BDF/src/BDF.jl)
+[BDF/src/BDF.jl:756](file:///home/sam/.julia/v0.3/BDF/src/BDF.jl)
 
 ---
 
@@ -123,11 +123,11 @@ splitBDFAtTrigger("res1.bdf", 202)
 
 
 **source:**
-[BDF/src/BDF.jl:711](file:///home/sam/.julia/v0.3/BDF/src/BDF.jl)
+[BDF/src/BDF.jl:713](file:///home/sam/.julia/v0.3/BDF/src/BDF.jl)
 
 ---
 
-#### writeBDF(fname::String, data, trigChan, statusChan, sampRate::Integer)
+#### writeBDF{P<:Real, Q<:Real, R<:Real}(fname::String, data::AbstractArray{P<:Real, 2}, trigChan::AbstractArray{Q<:Real, 1}, statusChan::AbstractArray{R<:Real, 1}, sampRate::Integer)
 Write a BDF file
    
 ##### Args:

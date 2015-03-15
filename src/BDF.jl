@@ -355,12 +355,14 @@ writeBDF("bdfRec.bdf", dats, trigs, statChan, sampRate, startDate="23.06.14",
 startTime="10.18.19")
 ```
 """ ->
-function writeBDF(fname::String, data, trigChan, statusChan, sampRate::Integer; subjID="",
-                  recID="", startDate=strftime("%d.%m.%y", time()),  startTime=strftime("%H.%M.%S", time()), versionDataFormat="24BIT",
-                  chanLabels=["" for i=1:size(data)[1]], transducer=["" for i=1:size(data)[1]],
-                  physDim=["" for i=1:size(data)[1]],
-                  physMin=[-262144 for i=1:size(data)[1]], physMax=[262144 for i=1:size(data)[1]],
-                  prefilt=["" for i=1:size(data)[1]])
+function writeBDF{P<:Real, Q<:Real, R<:Real, S<:String, T<:String, U<:String, V<:Real, W<:Real, Z<:String}(fname::String, data::AbstractMatrix{P}, trigChan::AbstractVector{Q}, statusChan::AbstractVector{R}, sampRate::Integer; subjID::String="",
+                  recID::String="", startDate::String=strftime("%d.%m.%y", time()),  startTime::String=strftime("%H.%M.%S", time()), versionDataFormat::String="24BIT",
+                  chanLabels::AbstractVector{S}=["" for i=1:size(data)[1]],
+                  transducer::AbstractVector{T}=["" for i=1:size(data)[1]],
+                  physDim::AbstractVector{U}=["" for i=1:size(data)[1]],
+                  physMin::AbstractVector{V}=[-262144 for i=1:size(data)[1]],
+                  physMax::AbstractVector{W}=[262144 for i=1:size(data)[1]],
+                  prefilt::AbstractVector{Z}=["" for i=1:size(data)[1]])
 
     #check data values within physMin physMax range
     for i=1:size(data)[1]
@@ -752,7 +754,7 @@ splitBDFAtTime("res1.bdf", 50)
 splitBDFAtTime("res2.bdf", [50, 100, 150])
 ```
 """ ->
-function splitBDFAtTime(fname::String, timeSeconds; from::Real=0, to::Real=-1)
+function splitBDFAtTime{T<:Real}(fname::String, timeSeconds::Union(T, AbstractVector{T}); from::Real=0, to::Real=-1)
 
     data, evtTab, trigChan, sysCodeChan = readBDF(fname, from=from, to=to)
     origHeader = readBDFHeader(fname)
