@@ -206,7 +206,17 @@ sampRate = bdfInfo["sampRate"][1]
 ```
 """ ->
 function readBDFHeader(fileName::String)
-    fid = open(fileName, "r")
+
+    readBDFHeader(open(fileName, "r"), fileName=fileName)
+end
+
+
+function readBDFHeader(fid::IO; fileName::String="")
+
+    if isa(fid, IOBuffer)
+        fid.ptr = 1
+    end
+
     idCodeNonASCII = read(fid, Uint8, 1)
     idCode = ascii(read(fid, Uint8, 7))
     subjID = ascii(read(fid, Uint8, 80))
