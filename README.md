@@ -9,4 +9,4 @@ Usage:
 
 Documentation is available here:
 
-https://jbdf.readthedocs.org/en/latest/
+http://bdfjl.readthedocs.org/en/latest/
