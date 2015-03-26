@@ -176,8 +176,8 @@ Read the header of a BDF file
 
 * `bdfInfo::Dict{String,Any}`: dictionary with the following fields
     * `idCode::String`: Identification code
-    * `subjId::`String`: Local subject identification
-    * `recId::String`: Local recording identification
+    * `subjID::`String`: Local subject identification
+    * `recID::String`: Local recording identification
     * `startDate::String`: Recording start date
     * `startTime::String`: Recording start time
     * `nBytes::Int`: Number of bytes occupied by the BDF header
@@ -329,8 +329,8 @@ Write a BDF file
 * `trigChan`: The triggers to be written to the BDF file (1XnDataPoints)
 * `statusChan`: The status channel codes to be written to the BDF file (1XnDataPoints)
 * `sampRate`: The sampling rate of the recording
-* `subjId`: Subject identifier (80 characters max)
-* `recId`: Recording identifier (80 characters max)
+* `subjID`: Subject identifier (80 characters max)
+* `recID`: Recording identifier (80 characters max)
 * `startDate`: Start date in "dd.mm.yy" format
 * `startTime`: Start time in "hh.mm.ss" format
 * `versionDataFormat`: Version of data format
