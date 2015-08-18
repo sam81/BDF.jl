@@ -23,7 +23,7 @@ splitBDFAtTrigger(copyFilePath, 200)
 dats1, evtTab1, trigs1, statusChan1 = readBDF(copyFilePath1)
 dats2, evtTab2, trigs2, statusChan2 = readBDF(copyFilePath2)
 
-writeBDF(copyFilePathComb, [dats1 dats2], [trigs1, trigs2], [statusChan1, statusChan2], bdfHeader["sampRate"][1])
+writeBDF(copyFilePathComb, [dats1 dats2], [trigs1; trigs2], [statusChan1; statusChan2], bdfHeader["sampRate"][1])
 datsCopy, evtTabCopy, trigsCopy, statusChanCopy = readBDF(copyFilePath)
 
 datsComb, evtTabComb, trigsComb, statusChanComb = readBDF(copyFilePathComb)

@@ -13,7 +13,7 @@ splitBDFAtTime(origFilePath, 30)
 dats1, evtTab1, trigs1, statusChan1 = readBDF(tSplitFilePath1)
 dats2, evtTab2, trigs2, statusChan2 = readBDF(tSplitFilePath2)
 
-writeBDF(tSplitFilePathComb, [dats1 dats2], [trigs1, trigs2], [statusChan1, statusChan2], bdfHeader["sampRate"][1])
+writeBDF(tSplitFilePathComb, [dats1 dats2], [trigs1; trigs2], [statusChan1; statusChan2], bdfHeader["sampRate"][1])
 datsComb, evtTabComb, trigsComb, statusChanComb = readBDF(tSplitFilePathComb)
 
 rm(tSplitFilePath1)
