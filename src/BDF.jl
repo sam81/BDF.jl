@@ -30,8 +30,8 @@ Read the data from a BDF file
 ```julia
 dats, evtTab, trigChan, sysChan = readBDF("res1.bdf")
 ```
-""" ->
-function readBDF(fname::String; from::Real=0, to::Real=-1)
+"""->
+function readBDF(fname::AbstractString; from::Real=0, to::Real=-1)
     #fname: file path
     #from: start time in seconds, default is 0
     #to: end time, default is the full duration
@@ -58,16 +58,16 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1)
     nDataRecords = parse(Int, ascii(read(fid, UInt8, 8)))
     recordDuration = float(ascii(read(fid, UInt8, 8)))
     nChannels = parse(Int, ascii(read(fid, UInt8, 4)))
-    chanLabels = Array(String, nChannels)
-    transducer = Array(String, nChannels)
-    physDim = Array(String, nChannels)
+    chanLabels = Array(ASCIIString, nChannels)
+    transducer = Array(ASCIIString, nChannels)
+    physDim = Array(ASCIIString, nChannels)
     physMin = Array(Int32, nChannels)
     physMax = Array(Int32, nChannels)
     digMin = Array(Int32, nChannels)
     digMax = Array(Int32, nChannels)
-    prefilt = Array(String, nChannels)
+    prefilt = Array(ASCIIString, nChannels)
     nSampRec = Array(Int, nChannels)
-    reserved = Array(String, nChannels)
+    reserved = Array(ASCIIString, nChannels)
     scaleFactor = Array(Float32, nChannels)
     sampRate = Array(Int, nChannels)
 
@@ -155,7 +155,7 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1)
     trigDurs = (stopPoints - startPoints)/sampRate[1]
 
     evt = trigChan[startPoints]
-    evtTab = Dict{String,Any}("code" => evt,
+    evtTab = @compat Dict{ASCIIString,Any}("code" => evt,
                                       "idx" => startPoints,
                                       "dur" => trigDurs
                                       )
@@ -174,27 +174,27 @@ Read the header of a BDF file
 
 ##### Returns:
 
-* `bdfInfo::Dict{String,Any}`: dictionary with the following fields
-    * `idCode::String`: Identification code
-    * `subjID::`String`: Local subject identification
-    * `recID::String`: Local recording identification
-    * `startDate::String`: Recording start date
-    * `startTime::String`: Recording start time
+* `bdfInfo::Dict{ASCIIString,Any}`: dictionary with the following fields
+    * `idCode::ASCIIString`: Identification code
+    * `subjID::`ASCIIString`: Local subject identification
+    * `recID::ASCIIString`: Local recording identification
+    * `startDate::ASCIIString`: Recording start date
+    * `startTime::ASCIIString`: Recording start time
     * `nBytes::Int`: Number of bytes occupied by the BDF header
-    * `versionDataFormat::String`: Version of data format
+    * `versionDataFormat::ASCIIString`: Version of data format
     * `nDataRecords::Int`: Number of data records "-1" if unknown
     * `recordDuration::FloatingPoint`: Duration of a data record, in seconds
     * `nChannels::Int`: Number of channels in data record
-    * `chanLabels::Array{String,1}`: Channel labels
-    * `transducer::Array{String,1}`: Transducer type
-    * `physDim::String`: Physical dimension of channels
+    * `chanLabels::Array{ASCIIString,1}`: Channel labels
+    * `transducer::Array{ASCIIString,1}`: Transducer type
+    * `physDim::ASCIIString`: Physical dimension of channels
     * `physMin::Array{Int64,1}`: Physical minimum in units of physical dimension
     * `physMax::Array{Int64,1}`: Physical maximum in units of physical dimension
     * `digMin::Array{Int64,1}`: Digital minimum
     * `digMax::Array{Int64,1}`: Digital maximum
-    * `prefilt::Array{String,1}`: Prefiltering
+    * `prefilt::Array{ASCIIString,1}`: Prefiltering
     * `nSampRec::Array{Int64,1}`: Number of samples in each data record
-    * `reserved::Array{String,1}`: Reserved
+    * `reserved::Array{ASCIIString,1}`: Reserved
     * `scaleFactor::Array{Float32,1}`: Scaling factor for digital to physical dimension
     * `sampRate::Array{Int64,1}`: Recording sampling rate
 
@@ -204,14 +204,15 @@ Read the header of a BDF file
 bdfInfo = readBDFHeader("res1.bdf")
 sampRate = bdfInfo["sampRate"][1]
 ```
-""" ->
-function readBDFHeader(fileName::String)
+"""->
+
+function readBDFHeader(fileName::AbstractString)
 
     readBDFHeader(open(fileName, "r"), fileName=fileName)
 end
 
 
-function readBDFHeader(fid::IO; fileName::String="")
+function readBDFHeader(fid::IO; fileName::AbstractString="")
 
     if isa(fid, IOBuffer)
         fid.ptr = 1
@@ -228,16 +229,16 @@ function readBDFHeader(fid::IO; fileName::String="")
     nDataRecords = parse(Int, ascii(read(fid, UInt8, 8)))
     recordDuration = float(ascii(read(fid, UInt8, 8)))
     nChannels = parse(Int, ascii(read(fid, UInt8, 4)))
-    chanLabels = Array(String, nChannels)
-    transducer = Array(String, nChannels)
-    physDim = Array(String, nChannels)
+    chanLabels = Array(ASCIIString, nChannels)
+    transducer = Array(ASCIIString, nChannels)
+    physDim = Array(ASCIIString, nChannels)
     physMin = Array(Int32, nChannels)
     physMax = Array(Int32, nChannels)
     digMin = Array(Int32, nChannels)
     digMax = Array(Int32, nChannels)
-    prefilt = Array(String, nChannels)
+    prefilt = Array(ASCIIString, nChannels)
     nSampRec = Array(Int, nChannels)
-    reserved = Array(String, nChannels)
+    reserved = Array(ASCIIString, nChannels)
     scaleFactor = Array(Float32, nChannels)
     sampRate = Array(Int, nChannels)
 
@@ -290,7 +291,7 @@ function readBDFHeader(fid::IO; fileName::String="")
 
     close(fid)
 
-    d = Dict{String,Any}("fileName" => fileName,
+    d = @compat Dict{ASCIIString,Any}("fileName" => fileName,
                                  "idCodeNonASCII" => idCodeNonASCII,
                                  "idCode" => idCode,
                                  "subjID" => subjID,
@@ -364,9 +365,9 @@ writeBDF("bdfRec.bdf", dats, trigs, statChan, sampRate)
 writeBDF("bdfRec.bdf", dats, trigs, statChan, sampRate, startDate="23.06.14",
 startTime="10.18.19")
 ```
-""" ->
-function writeBDF{P<:Real, Q<:Real, R<:Real, S<:String, T<:String, U<:String, V<:Real, W<:Real, Z<:String}(fname::String, data::AbstractMatrix{P}, trigChan::AbstractVector{Q}, statusChan::AbstractVector{R}, sampRate::Integer; subjID::String="",
-                  recID::String="", startDate::String=Libc.strftime("%d.%m.%y", time()),  startTime::String=Libc.strftime("%H.%M.%S", time()), versionDataFormat::String="24BIT",
+"""->
+function writeBDF{P<:Real, Q<:Real, R<:Real, S<:ASCIIString, T<:ASCIIString, U<:ASCIIString, V<:Real, W<:Real, Z<:ASCIIString}(fname::AbstractString, data::AbstractMatrix{P}, trigChan::AbstractVector{Q}, statusChan::AbstractVector{R}, sampRate::Integer; subjID::ASCIIString="",
+                  recID::ASCIIString="", startDate::ASCIIString=Libc.strftime("%d.%m.%y", time()),  startTime::ASCIIString=Libc.strftime("%H.%M.%S", time()), versionDataFormat::ASCIIString="24BIT",
                   chanLabels::AbstractVector{S}=["" for i=1:size(data)[1]],
                   transducer::AbstractVector{T}=["" for i=1:size(data)[1]],
                   physDim::AbstractVector{U}=["" for i=1:size(data)[1]],
@@ -725,7 +726,7 @@ Split a BDF file at points marked by a trigger into multiple files
 splitBDFAtTrigger("res1.bdf", 202)
 ```
 """ ->
-function splitBDFAtTrigger(fname::String, trigger::Integer; from::Real=0, to::Real=-1)
+function splitBDFAtTrigger(fname::AbstractString, trigger::Integer; from::Real=0, to::Real=-1)
 
     data, evtTab, trigChan, sysCodeChan = readBDF(fname, from=from, to=to)
     origHeader = readBDFHeader(fname)
@@ -768,7 +769,7 @@ splitBDFAtTime("res1.bdf", 50)
 splitBDFAtTime("res2.bdf", [50, 100, 150])
 ```
 """ ->
-function splitBDFAtTime{T<:Real}(fname::String, timeSeconds::Union(T, AbstractVector{T}); from::Real=0, to::Real=-1)
+function splitBDFAtTime{T<:Real}(fname::AbstractString, timeSeconds::Union{T, AbstractVector{T}}; from::Real=0, to::Real=-1)
 
     data, evtTab, trigChan, sysCodeChan = readBDF(fname, from=from, to=to)
     origHeader = readBDFHeader(fname)
