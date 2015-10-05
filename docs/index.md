@@ -76,7 +76,7 @@ RAM that uses.
 
 ### Bugs
 
-Please, report any bugs on github https://github.com/sam81/BDF.jl/issues
+Please, report any bugs on the project [issues page](https://github.com/sam81/BDF.jl/issues)
 
 #### Known Issues
 
