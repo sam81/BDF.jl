@@ -1,4 +1,4 @@
-using BDF, Base.Test, JLD, HDF5
+using BDF, Base.Test, HDF5, JLD
 
 #test BDF read and write
 origFilePath = "Newtest17-256.bdf"
