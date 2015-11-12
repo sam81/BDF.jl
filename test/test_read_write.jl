@@ -1,8 +1,8 @@
 using BDF, Base.Test
 
 #test BDF read and write
-origFilePath = "Newtest17-256.bdf"
-copyFilePath = "Newtest17-256_copy.bdf"
+origFilePath = joinpath(dirname(@__FILE__), "Newtest17-256.bdf")
+copyFilePath = joinpath(dirname(@__FILE__), "Newtest17-256_copy.bdf")
 bdfHeader = readBDFHeader(origFilePath)
 dats, evtTab, trigs, statusChan = readBDF(origFilePath)
 writeBDF(copyFilePath, dats, trigs, statusChan, bdfHeader["sampRate"][1],
@@ -19,12 +19,10 @@ writeBDF(copyFilePath, dats, trigs, statusChan, bdfHeader["sampRate"][1],
 bdfHeader2 = readBDFHeader(copyFilePath)
 dats2, evtTab2, trigs2, statusChan2 = readBDF(copyFilePath)
 rm(copyFilePath)
-bdfHeader["fileName"] = "Newtest17-256_copy.bdf"
+bdfHeader["fileName"] = copyFilePath
 
 @test isequal(bdfHeader2, bdfHeader)
 @test isequal(dats2, dats)
 @test isequal(evtTab2, evtTab)
 @test isequal(trigs2, trigs)
 @test isequal(statusChan2, statusChan)
-
-

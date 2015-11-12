@@ -1,11 +1,13 @@
 using BDF, Base.Test
 
 #test split BDF at trigger
-origFilePath = "Newtest17-256.bdf"
-copyFilePath = "Newtest17-256_midtrig.bdf"
-copyFilePath1 = "Newtest17-256_midtrig_1.bdf"
-copyFilePath2 = "Newtest17-256_midtrig_2.bdf"
-copyFilePathComb = "Newtest17-256_comb.bdf"
+
+
+origFilePath = joinpath(dirname(@__FILE__), "Newtest17-256.bdf")
+copyFilePath = joinpath(dirname(@__FILE__), "Newtest17-256_midtrig.bdf")
+copyFilePath1 = joinpath(dirname(@__FILE__), "Newtest17-256_midtrig_1.bdf")
+copyFilePath2 = joinpath(dirname(@__FILE__), "Newtest17-256_midtrig_2.bdf")
+copyFilePathComb = joinpath(dirname(@__FILE__), "Newtest17-256_comb.bdf")
 
 bdfHeader = readBDFHeader(origFilePath)
 dats, evtTab, trigs, statusChan = readBDF(origFilePath)
@@ -38,7 +40,3 @@ rm(copyFilePathComb)
 @test isequal(evtTabCopy, evtTabComb)
 @test isequal(trigsCopy, trigsComb)
 @test isequal(statusChanCopy, statusChanComb)
-
-
-
-
