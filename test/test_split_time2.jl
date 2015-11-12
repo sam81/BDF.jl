@@ -1,11 +1,11 @@
 using BDF, Base.Test
 
 #test split BDF at two time points
-origFilePath = "Newtest17-256.bdf"
-tSplitFilePath1 = "Newtest17-256_1.bdf"
-tSplitFilePath2 = "Newtest17-256_2.bdf"
-tSplitFilePath3 = "Newtest17-256_3.bdf"
-tSplitFilePathComb = "Newtest17-256_comb.bdf"
+origFilePath = joinpath(dirname(@__FILE__), "Newtest17-256.bdf")
+tSplitFilePath1 = joinpath(dirname(@__FILE__), "Newtest17-256_1.bdf")
+tSplitFilePath2 = joinpath(dirname(@__FILE__), "Newtest17-256_2.bdf")
+tSplitFilePath3 = joinpath(dirname(@__FILE__), "Newtest17-256_3.bdf")
+tSplitFilePathComb = joinpath(dirname(@__FILE__), "Newtest17-256_comb.bdf")
 
 bdfHeader = readBDFHeader(origFilePath)
 dats, evtTab, trigs, statusChan = readBDF(origFilePath)
@@ -23,12 +23,7 @@ rm(tSplitFilePath2)
 rm(tSplitFilePath3)
 rm(tSplitFilePathComb)
 
-
 @test isequal(dats, datsComb)
 @test isequal(evtTab, evtTabComb)
 @test isequal(trigs, trigsComb)
 @test isequal(statusChan, statusChanComb)
-
-
-
-

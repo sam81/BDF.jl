@@ -737,7 +737,7 @@ function splitBDFAtTrigger(fname::AbstractString, trigger::Integer; from::Real=0
     stopPoints =  [sepPoints; size(data)[2]] 
     
     for i=1:nChunks
-        thisFname = string(split(fname, ".")[1], "_", i, ".", split(fname, ".")[2])
+        thisFname = joinpath(dirname(fname), basename(fname)[1:end-4] * "_" * string(i) * basename(fname)[end-3:end])
         thisData = data[:, startPoints[i]: stopPoints[i]]
         thisTrigChan = trigChan[startPoints[i]: stopPoints[i]]
         thisSysCodeChan = sysCodeChan[startPoints[i]: stopPoints[i]]
@@ -785,7 +785,7 @@ function splitBDFAtTime{T<:Real}(fname::AbstractString, timeSeconds::Union{T, Ab
     stopPoints =  [sepPoints; size(data)[2]]
 
     for i=1:nChunks
-        thisFname = string(split(fname, ".")[1], "_", i, ".", split(fname, ".")[2])
+        thisFname = joinpath(dirname(fname), basename(fname)[1:end-4] * "_" * string(i) * basename(fname)[end-3:end])
         thisData = data[:, startPoints[i]: stopPoints[i]]
         thisTrigChan = trigChan[startPoints[i]: stopPoints[i]]
         thisSysCodeChan = sysCodeChan[startPoints[i]: stopPoints[i]]
