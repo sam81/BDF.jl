@@ -750,7 +750,7 @@ function splitBDFAtTrigger(fname::AbstractString, trigger::Integer; from::Real=0
             startDate=Libc.strftime("%d.%m.%y", time())
             startTime=Libc.strftime("%H.%M.%S", time())
         else
-            adjustedDateTime = startDateTime + Dates.Second(timeSeconds[i])
+            adjustedDateTime = startDateTime + Dates.Second(round(Int, timeSeconds[i]))
             startDate = Dates.format(adjustedDateTime, "dd.mm.yy")
             startTime = Dates.format(adjustedDateTime, "HH.MM.SS")
         end
@@ -817,7 +817,7 @@ function splitBDFAtTime{T<:Real}(fname::AbstractString, timeSeconds::Union{T, Ab
             startDate=Libc.strftime("%d.%m.%y", time())
             startTime=Libc.strftime("%H.%M.%S", time())
         else
-            adjustedDateTime = startDateTime + Dates.Second(timeSeconds[i])
+            adjustedDateTime = startDateTime + Dates.Second(round(Int, timeSeconds[i]))
             startDate = Dates.format(adjustedDateTime, "dd.mm.yy")
             startTime = Dates.format(adjustedDateTime, "HH.MM.SS")
         end
