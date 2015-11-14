@@ -737,7 +737,7 @@ function splitBDFAtTrigger(fname::AbstractString, trigger::Integer; from::Real=0
     startPoints = [1;         sepPoints.+1]
     stopPoints =  [sepPoints; size(data)[2]]
 
-    startDateTime = DateTime(string(origHeader["startDate"], ".", origHeader["startTime"]), "yy.mm.dd.HH.MM.SS") + Dates.Year(2000)
+    startDateTime = DateTime(string(origHeader["startDate"], ".", origHeader["startTime"]), "dd.mm.yy.HH.MM.SS")
     timeSeconds = [0; round(Int, sepPoints.*sampRate)]
 
     for i=1:nChunks
@@ -751,7 +751,7 @@ function splitBDFAtTrigger(fname::AbstractString, trigger::Integer; from::Real=0
             startTime=Libc.strftime("%H.%M.%S", time())
         else
             adjustedDateTime = startDateTime + Dates.Second(round(Int, timeSeconds[i]))
-            startDate = Dates.format(adjustedDateTime, "yy.mm.dd")
+            startDate = Dates.format(adjustedDateTime, "dd.mm.yy")
             startTime = Dates.format(adjustedDateTime, "HH.MM.SS")
         end
 
@@ -804,7 +804,7 @@ function splitBDFAtTime{T<:Real}(fname::AbstractString, timeSeconds::Union{T, Ab
     startPoints = [1;         sepPoints.+1]
     stopPoints =  [sepPoints; size(data)[2]]
 
-    startDateTime = DateTime(string(origHeader["startDate"], ".", origHeader["startTime"]), "yy.mm.dd.HH.MM.SS") + Dates.Year(2000)
+    startDateTime = DateTime(string(origHeader["startDate"], ".", origHeader["startTime"]), "dd.mm.yy.HH.MM.SS")
     timeSeconds = [0; timeSeconds]
 
     for i=1:nChunks
@@ -818,7 +818,7 @@ function splitBDFAtTime{T<:Real}(fname::AbstractString, timeSeconds::Union{T, Ab
             startTime=Libc.strftime("%H.%M.%S", time())
         else
             adjustedDateTime = startDateTime + Dates.Second(round(Int, timeSeconds[i]))
-            startDate = Dates.format(adjustedDateTime, "yy.mm.dd")
+            startDate = Dates.format(adjustedDateTime, "dd.mm.yy")
             startTime = Dates.format(adjustedDateTime, "HH.MM.SS")
         end
 
@@ -831,7 +831,8 @@ function splitBDFAtTime{T<:Real}(fname::AbstractString, timeSeconds::Union{T, Ab
              chanLabels=origHeader["chanLabels"][1:end-1],
              transducer=origHeader["transducer"][1:end-1],
              physDim=origHeader["physDim"][1:end-1],
-             physMin=origHeader["physMin"][1:end-1], physMax=origHeader["physMax"][1:end-1],
+             physMin=origHeader["physMin"][1:end-1],
+             physMax=origHeader["physMax"][1:end-1],
              prefilt=origHeader["prefilt"][1:end-1])
     end
 end
