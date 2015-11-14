@@ -719,7 +719,6 @@ Split a BDF file at points marked by a trigger into multiple files
 * `trigger`: The trigger marking the split points.
 * `from`: Start time of data chunk to read (seconds).
 * `to`: End time of data chunk to read (seconds).
-* `newDateTime`: Use a new date and time taken from when bdf is split.
 
 ##### Examples:
 
@@ -727,7 +726,7 @@ Split a BDF file at points marked by a trigger into multiple files
 splitBDFAtTrigger("res1.bdf", 202)
 ```
 """ ->
-function splitBDFAtTrigger(fname::AbstractString, trigger::Integer; from::Real=0, to::Real=-1, newDateTime::Bool=true)
+function splitBDFAtTrigger(fname::AbstractString, trigger::Integer; from::Real=0, to::Real=-1)
 
     data, evtTab, trigChan, sysCodeChan = readBDF(fname, from=from, to=to)
     origHeader = readBDFHeader(fname)
@@ -745,21 +744,13 @@ function splitBDFAtTrigger(fname::AbstractString, trigger::Integer; from::Real=0
         thisData = data[:, startPoints[i]: stopPoints[i]]
         thisTrigChan = trigChan[startPoints[i]: stopPoints[i]]
         thisSysCodeChan = sysCodeChan[startPoints[i]: stopPoints[i]]
-
-        if newDateTime
-            startDate=Libc.strftime("%d.%m.%y", time())
-            startTime=Libc.strftime("%H.%M.%S", time())
-        else
-            adjustedDateTime = startDateTime + Dates.Second(round(Int, timeSeconds[i]))
-            startDate = Dates.format(adjustedDateTime, "dd.mm.yy")
-            startTime = Dates.format(adjustedDateTime, "HH.MM.SS")
-        end
+        thisDateTime = startDateTime + Dates.Second(round(Int, timeSeconds[i]))
 
         writeBDF(thisFname, thisData, thisTrigChan, thisSysCodeChan, sampRate;
              subjID=origHeader["subjID"],
              recID=origHeader["recID"],
-             startDate=startDate,
-             startTime=startTime,
+             startDate=Dates.format(thisDateTime, "dd.mm.yy"),
+             startTime=Dates.format(thisDateTime, "HH.MM.SS"),
              versionDataFormat="24BIT",
              chanLabels=origHeader["chanLabels"][1:end-1],
              transducer=origHeader["transducer"][1:end-1],
@@ -780,7 +771,6 @@ Split a BDF file at one or more time points into multiple files
   This can be either a single number or an array of time points.
 * `from`: Start time of data chunk to read (seconds).
 * `to`: End time of data chunk to read (seconds).
-* `newDateTime`: Use a new date and time taken from when bdf is split.
 
 ##### Examples:
 
@@ -789,7 +779,7 @@ splitBDFAtTime("res1.bdf", 50)
 splitBDFAtTime("res2.bdf", [50, 100, 150])
 ```
 """ ->
-function splitBDFAtTime{T<:Real}(fname::AbstractString, timeSeconds::Union{T, AbstractVector{T}}; from::Real=0, to::Real=-1, newDateTime::Bool=true)
+function splitBDFAtTime{T<:Real}(fname::AbstractString, timeSeconds::Union{T, AbstractVector{T}}; from::Real=0, to::Real=-1)
 
     data, evtTab, trigChan, sysCodeChan = readBDF(fname, from=from, to=to)
     origHeader = readBDFHeader(fname)
@@ -803,7 +793,6 @@ function splitBDFAtTime{T<:Real}(fname::AbstractString, timeSeconds::Union{T, Ab
     nChunks = length(timeSeconds)+1
     startPoints = [1;         sepPoints.+1]
     stopPoints =  [sepPoints; size(data)[2]]
-
     startDateTime = DateTime(string(origHeader["startDate"], ".", origHeader["startTime"]), "dd.mm.yy.HH.MM.SS")
     timeSeconds = [0; timeSeconds]
 
@@ -812,21 +801,12 @@ function splitBDFAtTime{T<:Real}(fname::AbstractString, timeSeconds::Union{T, Ab
         thisData = data[:, startPoints[i]: stopPoints[i]]
         thisTrigChan = trigChan[startPoints[i]: stopPoints[i]]
         thisSysCodeChan = sysCodeChan[startPoints[i]: stopPoints[i]]
-
-        if newDateTime
-            startDate=Libc.strftime("%d.%m.%y", time())
-            startTime=Libc.strftime("%H.%M.%S", time())
-        else
-            adjustedDateTime = startDateTime + Dates.Second(round(Int, timeSeconds[i]))
-            startDate = Dates.format(adjustedDateTime, "dd.mm.yy")
-            startTime = Dates.format(adjustedDateTime, "HH.MM.SS")
-        end
-
+        thisDateTime = startDateTime + Dates.Second(round(Int, timeSeconds[i]))
 
         writeBDF(thisFname, thisData, thisTrigChan, thisSysCodeChan, sampRate; subjID=origHeader["subjID"],
              recID=origHeader["recID"],
-             startDate=startDate,
-             startTime=startTime,
+             startDate=Dates.format(thisDateTime, "dd.mm.yy"),
+             startTime=Dates.format(thisDateTime, "HH.MM.SS"),
              versionDataFormat="24BIT",
              chanLabels=origHeader["chanLabels"][1:end-1],
              transducer=origHeader["transducer"][1:end-1],
