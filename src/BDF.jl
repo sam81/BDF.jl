@@ -734,19 +734,29 @@ function splitBDFAtTrigger(fname::AbstractString, trigger::Integer; from::Real=0
     sepPoints = evtTab["idx"][find(evtTab["code"] .== trigger)]
     nChunks = length(sepPoints)+1
     startPoints = [1;         sepPoints.+1]
-    stopPoints =  [sepPoints; size(data)[2]] 
-    
+    stopPoints =  [sepPoints; size(data)[2]]
+
+    startDateTime = DateTime(string(origHeader["startDate"], ".", origHeader["startTime"]), "dd.mm.yy.HH.MM.SS")
+    timeSeconds = [0; round(Int, sepPoints.*sampRate)]
+
     for i=1:nChunks
         thisFname = joinpath(dirname(fname), basename(fname)[1:end-4] * "_" * string(i) * basename(fname)[end-3:end])
         thisData = data[:, startPoints[i]: stopPoints[i]]
         thisTrigChan = trigChan[startPoints[i]: stopPoints[i]]
         thisSysCodeChan = sysCodeChan[startPoints[i]: stopPoints[i]]
+        thisDateTime = startDateTime + Dates.Second(round(Int, timeSeconds[i]))
 
-        writeBDF(thisFname, thisData, thisTrigChan, thisSysCodeChan, sampRate; subjID=origHeader["subjID"],
-             recID=origHeader["recID"], startDate=Libc.strftime("%d.%m.%y", time()),  startTime=Libc.strftime("%H.%M.%S", time()), versionDataFormat="24BIT",
-             chanLabels=origHeader["chanLabels"][1:end-1], transducer=origHeader["transducer"][1:end-1],
+        writeBDF(thisFname, thisData, thisTrigChan, thisSysCodeChan, sampRate;
+             subjID=origHeader["subjID"],
+             recID=origHeader["recID"],
+             startDate=Dates.format(thisDateTime, "dd.mm.yy"),
+             startTime=Dates.format(thisDateTime, "HH.MM.SS"),
+             versionDataFormat="24BIT",
+             chanLabels=origHeader["chanLabels"][1:end-1],
+             transducer=origHeader["transducer"][1:end-1],
              physDim=origHeader["physDim"][1:end-1],
-             physMin=origHeader["physMin"][1:end-1], physMax=origHeader["physMax"][1:end-1],
+             physMin=origHeader["physMin"][1:end-1],
+             physMax=origHeader["physMax"][1:end-1],
              prefilt=origHeader["prefilt"][1:end-1])
     end
 end
@@ -783,18 +793,26 @@ function splitBDFAtTime{T<:Real}(fname::AbstractString, timeSeconds::Union{T, Ab
     nChunks = length(timeSeconds)+1
     startPoints = [1;         sepPoints.+1]
     stopPoints =  [sepPoints; size(data)[2]]
+    startDateTime = DateTime(string(origHeader["startDate"], ".", origHeader["startTime"]), "dd.mm.yy.HH.MM.SS")
+    timeSeconds = [0; timeSeconds]
 
     for i=1:nChunks
         thisFname = joinpath(dirname(fname), basename(fname)[1:end-4] * "_" * string(i) * basename(fname)[end-3:end])
         thisData = data[:, startPoints[i]: stopPoints[i]]
         thisTrigChan = trigChan[startPoints[i]: stopPoints[i]]
         thisSysCodeChan = sysCodeChan[startPoints[i]: stopPoints[i]]
+        thisDateTime = startDateTime + Dates.Second(round(Int, timeSeconds[i]))
 
         writeBDF(thisFname, thisData, thisTrigChan, thisSysCodeChan, sampRate; subjID=origHeader["subjID"],
-             recID=origHeader["recID"], startDate=Libc.strftime("%d.%m.%y", time()),  startTime=Libc.strftime("%H.%M.%S", time()), versionDataFormat="24BIT",
-             chanLabels=origHeader["chanLabels"][1:end-1], transducer=origHeader["transducer"][1:end-1],
+             recID=origHeader["recID"],
+             startDate=Dates.format(thisDateTime, "dd.mm.yy"),
+             startTime=Dates.format(thisDateTime, "HH.MM.SS"),
+             versionDataFormat="24BIT",
+             chanLabels=origHeader["chanLabels"][1:end-1],
+             transducer=origHeader["transducer"][1:end-1],
              physDim=origHeader["physDim"][1:end-1],
-             physMin=origHeader["physMin"][1:end-1], physMax=origHeader["physMax"][1:end-1],
+             physMin=origHeader["physMin"][1:end-1],
+             physMax=origHeader["physMax"][1:end-1],
              prefilt=origHeader["prefilt"][1:end-1])
     end
 end
