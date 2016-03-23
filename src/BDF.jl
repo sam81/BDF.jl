@@ -7,7 +7,7 @@ export readBDF, readBDFHeader, writeBDF, splitBDFAtTime, splitBDFAtTrigger
 
 @doc doc"""
 Read the data from a BDF file
-   
+
 ##### Args:
 
 * `fname`: Name of the BDF file to read.
@@ -21,8 +21,8 @@ Read the data from a BDF file
     * code: trigger codes
     * idx: trigger indexes
     * dur: trigger durations
-* trigChannel: the raw trigger channel  
-* syscodeChannel: the raw system codes channel     
+* trigChannel: the raw trigger channel
+* syscodeChannel: the raw system codes channel
 
 
 ##### Examples:
@@ -117,7 +117,7 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1)
         scaleFactor[i] = Float32(physMax[i]-physMin[i])/(digMax[i]-digMin[i])
         sampRate[i] = nSampRec[i]/recordDuration
     end
-  
+
     if to < 1
         to = nDataRecords
     end
@@ -167,7 +167,7 @@ end
 
 @doc doc"""
 Read the header of a BDF file
-   
+
 ##### Args:
 
 * fileName: Name of the BDF file to read.
@@ -318,12 +318,12 @@ function readBDFHeader(fid::IO; fileName::AbstractString="")
                                  "duration" => duration,
                                  )
     return(d)
-    
+
 end
 
 @doc doc"""
 Write a BDF file
-   
+
 ##### Args:
 * `fname`: Name of the BDF file to write.
 * `data`: The nChannelsXnDataPoints array to be written to the BDF file
@@ -346,10 +346,10 @@ Write a BDF file
 
 Only the first five arguments are required. The other arguments are optional and
 the corresponding BDF fields will be left empty or filled with defaults arguments.
-      
-Data records are written in 1-second units. If the number of data points passed to 
-`writeBDF` is not an integer multiple of the sampling rate the data array, as well 
-as the trigger and status channel arrays will be padded with zeros to fill the last 
+
+Data records are written in 1-second units. If the number of data points passed to
+`writeBDF` is not an integer multiple of the sampling rate the data array, as well
+as the trigger and status channel arrays will be padded with zeros to fill the last
 data record before it is written to disk.
 
 ##### Examples:
@@ -388,7 +388,7 @@ function writeBDF{P<:Real, Q<:Real, R<:Real, S<:ASCIIString, T<:ASCIIString, U<:
     if (maximum(statusChan) > 2^8-1) | (minimum(statusChan) < 0)
         error("status channel values exceed allowed range [0, 255] range, exiting!")
     end
-    
+
     modulo = mod(size(data)[2], sampRate)
     if modulo == 0
         padSize = 0
@@ -404,7 +404,7 @@ function writeBDF{P<:Real, Q<:Real, R<:Real, S<:ASCIIString, T<:ASCIIString, U<:
     nChannels = size(dats)[1] + 1
     nSamples = size(dats)[2]
     fid = open(fname, "w")
-    
+
     write(fid, 0xff)
     idCode = "BIOSEMI"
     for i=1:length(idCode)
@@ -513,7 +513,7 @@ function writeBDF{P<:Real, Q<:Real, R<:Real, S<:ASCIIString, T<:ASCIIString, U<:
     if length(chanLabels) < nChannels -1
         #println("Warning: number of chanLabels less than number of channels!")
         chanLabels = vcat(chanLabels, ["" for k=1:(nChannels-1)-length(chanLabels)])
-        
+
     end
     for j=1:length(chanLabels)
         for i=1:length(chanLabels[j])
@@ -682,7 +682,7 @@ function writeBDF{P<:Real, Q<:Real, R<:Real, S<:ASCIIString, T<:ASCIIString, U<:
     for i=1:nChannels-1
         dats[i,:] = dats[i,:] /scaleFactor[i]
     end
-   
+
     dats = round(Int32, dats) #need to pad dats
     trigs = round(Int16, trigs)
     statChan = round(Int16, statChan)
@@ -706,13 +706,13 @@ function writeBDF{P<:Real, Q<:Real, R<:Real, S<:ASCIIString, T<:ASCIIString, U<:
             end
         end
     end
-  
+
     close(fid)
 end
 
 @doc doc"""
 Split a BDF file at points marked by a trigger into multiple files
-   
+
 ##### Args:
 
 * `fname`: Name of the BDF file to split.
@@ -725,7 +725,7 @@ Split a BDF file at points marked by a trigger into multiple files
 ```julia
 splitBDFAtTrigger("res1.bdf", 202)
 ```
-""" ->
+"""->
 function splitBDFAtTrigger(fname::AbstractString, trigger::Integer; from::Real=0, to::Real=-1)
 
     data, evtTab, trigChan, sysCodeChan = readBDF(fname, from=from, to=to)
@@ -763,11 +763,11 @@ end
 
 @doc doc"""
 Split a BDF file at one or more time points into multiple files
-   
+
 ##### Args:
 
 * `fname`: Name of the BDF file to split.
-* `timeSeconds`: array listing the time(s) at which the BDF file should be split, in seconds. 
+* `timeSeconds`: array listing the time(s) at which the BDF file should be split, in seconds.
   This can be either a single number or an array of time points.
 * `from`: Start time of data chunk to read (seconds).
 * `to`: End time of data chunk to read (seconds).
@@ -778,7 +778,7 @@ Split a BDF file at one or more time points into multiple files
 splitBDFAtTime("res1.bdf", 50)
 splitBDFAtTime("res2.bdf", [50, 100, 150])
 ```
-""" ->
+"""->
 function splitBDFAtTime{T<:Real}(fname::AbstractString, timeSeconds::Union{T, AbstractVector{T}}; from::Real=0, to::Real=-1)
 
     data, evtTab, trigChan, sysCodeChan = readBDF(fname, from=from, to=to)
