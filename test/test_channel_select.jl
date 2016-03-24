@@ -1,10 +1,8 @@
-using BDF, Base.Test, Plots
-unicodeplots()
+using BDF, Base.Test
 
 origFilePath = joinpath(dirname(@__FILE__), "Newtest17-256.bdf")
 
 dats, evtTab, trigs, statusChan = readBDF(origFilePath)
-
 
 for ci in ([1, 2, 3], [1, 2, 3, 4, 5, 6], 1:14, [1, 3, 9, 11, 15], [5, 2, 7])
 
