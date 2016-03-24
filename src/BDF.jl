@@ -13,7 +13,8 @@ Read the data from a BDF file
 * `fname`: Name of the BDF file to read.
 * `from`: Start time of data chunk to read (seconds).
 * `to`: End time of data chunk to read (seconds).
-* `channels`: Channels to read (indicies or channel names)
+* `channels`: Channels to read (indicies or channel names).
+* `transposedata`: Return transposed version of the `dats` array.
 
 ##### Returns:
 
@@ -32,7 +33,7 @@ Read the data from a BDF file
 dats, evtTab, trigChan, sysChan = readBDF("res1.bdf")
 ```
 """->
-function readBDF(fname::AbstractString; from::Real=0, to::Real=-1, channels::AbstractArray=[0])
+function readBDF(fname::AbstractString; from::Real=0, to::Real=-1, channels::AbstractArray=[0], transposedata::Bool=false)
 
     channels = unique(channels)
     if isa(channels, AbstractVector{ASCIIString})
@@ -41,11 +42,11 @@ function readBDF(fname::AbstractString; from::Real=0, to::Real=-1, channels::Abs
         channels = channels[channels .!= 0]
     end
 
-    readBDF(open(fname, "r"), from=from, to=to, channels=channels)
+    readBDF(open(fname, "r"), from=from, to=to, channels=channels, transposedata=transposedata)
 end
 
 
-function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractArray{Int}=[0])
+function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractArray{Int}=[0], transposedata::Bool=false)
 
     if isa(fid, IOBuffer)
         fid.ptr = 1
@@ -132,7 +133,11 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractArray{Int
         to = nDataRecords
     end
     recordsToRead = to - from
-    data = Array(Int32, ((nkeepchannels), (recordsToRead*nSampRec[1])))
+    if transposedata
+        data = Array(Int32, ((recordsToRead*nSampRec[1]), (nkeepchannels)))
+    else
+        data = Array(Int32, ((nkeepchannels), (recordsToRead*nSampRec[1])))
+    end
     trigChan = Array(Int16, recordsToRead*nSampRec[1])
     sysCodeChan = Array(Int16,  recordsToRead*nSampRec[1])
 
@@ -145,7 +150,11 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractArray{Int
             cidx = findfirst(channels, c)
             if (chanLabels[c] != "Status") & (cidx != 0)
                 for s=1:nSampRec[1]
-                    data[cidx,(n-1)*nSampRec[1]+s] = ((Int32(x[pos]) << 8) | (Int32(x[pos+1]) << 16) | (Int32(x[pos+2]) << 24) )>> 8
+                    if transposedata
+                        data[(n-1)*nSampRec[1]+s,cidx] = ((Int32(x[pos]) << 8) | (Int32(x[pos+1]) << 16) | (Int32(x[pos+2]) << 24) )>> 8
+                    else
+                        data[cidx,(n-1)*nSampRec[1]+s] = ((Int32(x[pos]) << 8) | (Int32(x[pos+1]) << 16) | (Int32(x[pos+2]) << 24) )>> 8
+                    end
                     pos = pos+3
                 end
             elseif chanLabels[c] == "Status"
