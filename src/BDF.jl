@@ -11,8 +11,9 @@ Read the data from a BDF file
 ##### Args:
 
 * `fname`: Name of the BDF file to read.
-* `from`: Start time of data chunk to read (seconds)
+* `from`: Start time of data chunk to read (seconds).
 * `to`: End time of data chunk to read (seconds).
+* `channels`: Channels to read (indicies or channel names)
 
 ##### Returns:
 
@@ -31,17 +32,20 @@ Read the data from a BDF file
 dats, evtTab, trigChan, sysChan = readBDF("res1.bdf")
 ```
 """->
-function readBDF(fname::AbstractString; from::Real=0, to::Real=-1)
-    #fname: file path
-    #from: start time in seconds, default is 0
-    #to: end time, default is the full duration
-    #returns data, trigChan, sysCodeChan, evtTab
+function readBDF(fname::AbstractString; from::Real=0, to::Real=-1, channels::AbstractArray=[0])
 
-    readBDF(open(fname, "r"), from=from, to=to)
+    channels = unique(channels)
+    if isa(channels, AbstractVector{ASCIIString})
+        bdfHeader = readBDFHeader(fname)
+        channels = [findfirst(channels, c) for c in bdfHeader["chanLabels"]]
+        channels = channels[channels .!= 0]
+    end
+
+    readBDF(open(fname, "r"), from=from, to=to, channels=channels)
 end
 
 
-function readBDF(fid::IO; from::Real=0, to::Real=-1)
+function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractArray{Int}=[0])
 
     if isa(fid, IOBuffer)
         fid.ptr = 1
@@ -72,6 +76,12 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1)
     sampRate = Array(Int, nChannels)
 
     duration = recordDuration*nDataRecords
+
+    channels = unique(channels)
+    if channels == [0]
+        channels = 1:(nChannels-1)
+    end
+    nkeepchannels = length(channels)
 
     for i=1:nChannels
         chanLabels[i] = strip(ascii(read(fid, UInt8, 16)))
@@ -122,7 +132,7 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1)
         to = nDataRecords
     end
     recordsToRead = to - from
-    data = Array(Int32, ((nChannels-1), (recordsToRead*nSampRec[1])))
+    data = Array(Int32, ((nkeepchannels), (recordsToRead*nSampRec[1])))
     trigChan = Array(Int16, recordsToRead*nSampRec[1])
     sysCodeChan = Array(Int16,  recordsToRead*nSampRec[1])
 
@@ -132,15 +142,21 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1)
     pos = 1
     for n=1:recordsToRead
         for c=1:nChannels
-            if chanLabels[c] != "Status"
+            cidx = findfirst(channels, c)
+            if (chanLabels[c] != "Status") & (cidx != 0)
                 for s=1:nSampRec[1]
-                    data[c,(n-1)*nSampRec[1]+s] = ((Int32(x[pos]) << 8) | (Int32(x[pos+1]) << 16) | (Int32(x[pos+2]) << 24) )>> 8
+                    data[cidx,(n-1)*nSampRec[1]+s] = ((Int32(x[pos]) << 8) | (Int32(x[pos+1]) << 16) | (Int32(x[pos+2]) << 24) )>> 8
                     pos = pos+3
                 end
-            else
+            elseif chanLabels[c] == "Status"
                 for s=1:nSampRec[1]
                     trigChan[(n-1)*nSampRec[1]+s] = ((UInt16(x[pos])) | (UInt16(x[pos+1]) << 8)) & 255
                     sysCodeChan[(n-1)*nSampRec[1]+s] = Int16(x[pos+2])
+                    pos = pos+3
+                end
+            else
+                # Channel not selected
+                for s=1:nSampRec[1]
                     pos = pos+3
                 end
             end
