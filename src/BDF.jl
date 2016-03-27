@@ -13,12 +13,13 @@ Read the data from a BDF file
 * `fName`: Name of the BDF file to read.
 * `from`: Start time of data chunk to read (seconds).
 * `to`: End time of data chunk to read (seconds).
-* `channels`: Channels to read (indicies or channel names).
-* `transposeData`: Return transposed version of the `dats` array.
+* `channels`: Channels to read (indices or channel names).
+* `transposeData`: If `true`, return transposed version of the `dats` array. Default is `false`.
 
 ##### Returns:
 
-* `dats::Array{Float32, 2}`: nChannels X nDataPoints matrix containing the data
+* `dats::Array{Float32, 2}`: The matrix containing the data, this will be a nChannels X nDataPoints matrix if `transposeData` is `false` (default).
+                             If `transposeData` is `true`, however, it will be a nDataPoints X nChannels matrix.
 * eventTable: dictionary with three fields
     * code: trigger codes
     * idx: trigger indexes
@@ -31,6 +32,9 @@ Read the data from a BDF file
 
 ```julia
 dats, evtTab, trigChan, sysChan = readBDF("res1.bdf")
+dats, evtTab, trigChan, sysChan = readBDF("res1.bdf", channels=[1,3]) #read only channels 1 and 3
+dats, evtTab, trigChan, sysChan = readBDF("res1.bdf", channels=["Fz","RM"]) #read only channels Fz and RM
+dats, evtTab, trigChan, sysChan = readBDF("res1.bdf", transposeData=true) #return transposed data matrix (i.e. nDataPoints X nChannels)
 ```
 """->
 function readBDF(fName::AbstractString; from::Real=0, to::Real=-1, channels::AbstractVector=[-1], transposeData::Bool=false)
