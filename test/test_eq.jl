@@ -21,7 +21,7 @@ testData = h5read(joinpath(dirname(@__FILE__), "Newtest17-256_data.h5"), "data")
 
 
 # Test transposed return
-dats, evtTab, trigs, statusChan = readBDF(origFilePath, transposedata = true)
+dats, evtTab, trigs, statusChan = readBDF(origFilePath, transposeData = true)
 @test isequal(testData["EEG"]', dats)
 @test isequal(testData["trigs"], trigs)
 @test isequal(testData["idx"], evtTab["idx"])

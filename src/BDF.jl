@@ -10,11 +10,11 @@ Read the data from a BDF file
 
 ##### Args:
 
-* `fname`: Name of the BDF file to read.
+* `fName`: Name of the BDF file to read.
 * `from`: Start time of data chunk to read (seconds).
 * `to`: End time of data chunk to read (seconds).
 * `channels`: Channels to read (indicies or channel names).
-* `transposedata`: Return transposed version of the `dats` array.
+* `transposeData`: Return transposed version of the `dats` array.
 
 ##### Returns:
 
@@ -33,20 +33,20 @@ Read the data from a BDF file
 dats, evtTab, trigChan, sysChan = readBDF("res1.bdf")
 ```
 """->
-function readBDF(fname::AbstractString; from::Real=0, to::Real=-1, channels::AbstractArray=[0], transposedata::Bool=false)
+function readBDF(fName::AbstractString; from::Real=0, to::Real=-1, channels::AbstractArray=[0], transposeData::Bool=false)
 
     channels = unique(channels)
     if isa(channels, AbstractVector{ASCIIString})
-        bdfHeader = readBDFHeader(fname)
+        bdfHeader = readBDFHeader(fName)
         channels = [findfirst(channels, c) for c in bdfHeader["chanLabels"]]
         channels = channels[channels .!= 0]
     end
 
-    readBDF(open(fname, "r"), from=from, to=to, channels=channels, transposedata=transposedata)
+    readBDF(open(fName, "r"), from=from, to=to, channels=channels, transposeData=transposeData)
 end
 
 
-function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractArray{Int}=[0], transposedata::Bool=false)
+function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractArray{Int}=[0], transposeData::Bool=false)
 
     if isa(fid, IOBuffer)
         fid.ptr = 1
@@ -133,7 +133,7 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractArray{Int
         to = nDataRecords
     end
     recordsToRead = to - from
-    if transposedata
+    if transposeData
         data = Array(Int32, ((recordsToRead*nSampRec[1]), (nkeepchannels)))
     else
         data = Array(Int32, ((nkeepchannels), (recordsToRead*nSampRec[1])))
@@ -145,7 +145,7 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractArray{Int
     skip(fid, startPos)
     x = read(fid, UInt8, 3*recordsToRead*nChannels*nSampRec[1])
     pos = 1
-    if transposedata
+    if transposeData
         for n=1:recordsToRead
             for c=1:nChannels
                 cidx = findfirst(channels, c)
@@ -217,7 +217,7 @@ Read the header of a BDF file
 
 ##### Args:
 
-* fileName: Name of the BDF file to read.
+* fName: Name of the BDF file to read.
 
 ##### Returns:
 
@@ -253,13 +253,13 @@ sampRate = bdfInfo["sampRate"][1]
 ```
 """->
 
-function readBDFHeader(fileName::AbstractString)
+function readBDFHeader(fName::AbstractString)
 
-    readBDFHeader(open(fileName, "r"), fileName=fileName)
+    readBDFHeader(open(fName, "r"), fName=fName)
 end
 
 
-function readBDFHeader(fid::IO; fileName::AbstractString="")
+function readBDFHeader(fid::IO; fName::AbstractString="")
 
     if isa(fid, IOBuffer)
         fid.ptr = 1
@@ -338,7 +338,7 @@ function readBDFHeader(fid::IO; fileName::AbstractString="")
 
     close(fid)
 
-    d = @compat Dict{ASCIIString,Any}("fileName" => fileName,
+    d = @compat Dict{ASCIIString,Any}("fileName" => fName,
                                  "idCodeNonASCII" => idCodeNonASCII,
                                  "idCode" => idCode,
                                  "subjID" => subjID,
@@ -372,7 +372,7 @@ end
 Write a BDF file
 
 ##### Args:
-* `fname`: Name of the BDF file to write.
+* `fName`: Name of the BDF file to write.
 * `data`: The nChannelsXnDataPoints array to be written to the BDF file
 * `trigChan`: The triggers to be written to the BDF file (1XnDataPoints)
 * `statusChan`: The status channel codes to be written to the BDF file (1XnDataPoints)
@@ -413,7 +413,7 @@ writeBDF("bdfRec.bdf", dats, trigs, statChan, sampRate, startDate="23.06.14",
 startTime="10.18.19")
 ```
 """->
-function writeBDF{P<:Real, Q<:Real, R<:Real, S<:ASCIIString, T<:ASCIIString, U<:ASCIIString, V<:Real, W<:Real, Z<:ASCIIString}(fname::AbstractString, data::AbstractMatrix{P}, trigChan::AbstractVector{Q}, statusChan::AbstractVector{R}, sampRate::Integer; subjID::ASCIIString="",
+function writeBDF{P<:Real, Q<:Real, R<:Real, S<:ASCIIString, T<:ASCIIString, U<:ASCIIString, V<:Real, W<:Real, Z<:ASCIIString}(fName::AbstractString, data::AbstractMatrix{P}, trigChan::AbstractVector{Q}, statusChan::AbstractVector{R}, sampRate::Integer; subjID::ASCIIString="",
                   recID::ASCIIString="", startDate::ASCIIString=Libc.strftime("%d.%m.%y", time()),  startTime::ASCIIString=Libc.strftime("%H.%M.%S", time()), versionDataFormat::ASCIIString="24BIT",
                   chanLabels::AbstractVector{S}=["" for i=1:size(data)[1]],
                   transducer::AbstractVector{T}=["" for i=1:size(data)[1]],
@@ -450,7 +450,7 @@ function writeBDF{P<:Real, Q<:Real, R<:Real, S<:ASCIIString, T<:ASCIIString, U<:
     ## statChan = copy(statusChan)
     nChannels = size(dats)[1] + 1
     nSamples = size(dats)[2]
-    fid = open(fname, "w")
+    fid = open(fName, "w")
 
     write(fid, 0xff)
     idCode = "BIOSEMI"
@@ -762,7 +762,7 @@ Split a BDF file at points marked by a trigger into multiple files
 
 ##### Args:
 
-* `fname`: Name of the BDF file to split.
+* `fName`: Name of the BDF file to split.
 * `trigger`: The trigger marking the split points.
 * `from`: Start time of data chunk to read (seconds).
 * `to`: End time of data chunk to read (seconds).
@@ -773,10 +773,10 @@ Split a BDF file at points marked by a trigger into multiple files
 splitBDFAtTrigger("res1.bdf", 202)
 ```
 """->
-function splitBDFAtTrigger(fname::AbstractString, trigger::Integer; from::Real=0, to::Real=-1)
+function splitBDFAtTrigger(fName::AbstractString, trigger::Integer; from::Real=0, to::Real=-1)
 
-    data, evtTab, trigChan, sysCodeChan = readBDF(fname, from=from, to=to)
-    origHeader = readBDFHeader(fname)
+    data, evtTab, trigChan, sysCodeChan = readBDF(fName, from=from, to=to)
+    origHeader = readBDFHeader(fName)
     sampRate = origHeader["sampRate"][1] #assuming sampling rate is the same for all channels
     sepPoints = evtTab["idx"][find(evtTab["code"] .== trigger)]
     nChunks = length(sepPoints)+1
@@ -787,7 +787,7 @@ function splitBDFAtTrigger(fname::AbstractString, trigger::Integer; from::Real=0
     timeSeconds = [0; round(Int, sepPoints.*sampRate)]
 
     for i=1:nChunks
-        thisFname = joinpath(dirname(fname), basename(fname)[1:end-4] * "_" * string(i) * basename(fname)[end-3:end])
+        thisFname = joinpath(dirname(fName), basename(fName)[1:end-4] * "_" * string(i) * basename(fName)[end-3:end])
         thisData = data[:, startPoints[i]: stopPoints[i]]
         thisTrigChan = trigChan[startPoints[i]: stopPoints[i]]
         thisSysCodeChan = sysCodeChan[startPoints[i]: stopPoints[i]]
@@ -813,7 +813,7 @@ Split a BDF file at one or more time points into multiple files
 
 ##### Args:
 
-* `fname`: Name of the BDF file to split.
+* `fName`: Name of the BDF file to split.
 * `timeSeconds`: array listing the time(s) at which the BDF file should be split, in seconds.
   This can be either a single number or an array of time points.
 * `from`: Start time of data chunk to read (seconds).
@@ -826,10 +826,10 @@ splitBDFAtTime("res1.bdf", 50)
 splitBDFAtTime("res2.bdf", [50, 100, 150])
 ```
 """->
-function splitBDFAtTime{T<:Real}(fname::AbstractString, timeSeconds::Union{T, AbstractVector{T}}; from::Real=0, to::Real=-1)
+function splitBDFAtTime{T<:Real}(fName::AbstractString, timeSeconds::Union{T, AbstractVector{T}}; from::Real=0, to::Real=-1)
 
-    data, evtTab, trigChan, sysCodeChan = readBDF(fname, from=from, to=to)
-    origHeader = readBDFHeader(fname)
+    data, evtTab, trigChan, sysCodeChan = readBDF(fName, from=from, to=to)
+    origHeader = readBDFHeader(fName)
     sampRate = origHeader["sampRate"][1] #assuming sampling rate is the same for all channels
     sepPoints = round(Int, sampRate.*timeSeconds)
     for i=1:length(sepPoints)
@@ -844,7 +844,7 @@ function splitBDFAtTime{T<:Real}(fname::AbstractString, timeSeconds::Union{T, Ab
     timeSeconds = [0; timeSeconds]
 
     for i=1:nChunks
-        thisFname = joinpath(dirname(fname), basename(fname)[1:end-4] * "_" * string(i) * basename(fname)[end-3:end])
+        thisFname = joinpath(dirname(fName), basename(fName)[1:end-4] * "_" * string(i) * basename(fName)[end-3:end])
         thisData = data[:, startPoints[i]: stopPoints[i]]
         thisTrigChan = trigChan[startPoints[i]: stopPoints[i]]
         thisSysCodeChan = sysCodeChan[startPoints[i]: stopPoints[i]]
