@@ -2,9 +2,11 @@ Read the data from a BDF file
 
 ##### Args:
 
-* `fname`: Name of the BDF file to read.
-* `from`: Start time of data chunk to read (seconds)
+* `fName`: Name of the BDF file to read.
+* `from`: Start time of data chunk to read (seconds).
 * `to`: End time of data chunk to read (seconds).
+* `channels`: Channels to read (indicies or channel names).
+* `transposeData`: Return transposed version of the `dats` array.
 
 ##### Returns:
 
@@ -27,11 +29,11 @@ Read the header of a BDF file
 
 ##### Args:
 
-* fileName: Name of the BDF file to read.
+* fName: Name of the BDF file to read.
 
 ##### Returns:
 
-* `bdfInfo::Dict{ASCIIString,Any}`: dictionary with the following fields
+* `bdfInfo::Dict{ASCIIString,Any}`: dictionary with the following fields:
     * `idCode::ASCIIString`: Identification code
     * `subjID::`ASCIIString`: Local subject identification
     * `recID::ASCIIString`: Local recording identification
@@ -65,7 +67,7 @@ sampRate = bdfInfo["sampRate"][1]
 Write a BDF file
 
 ##### Args:
-* `fname`: Name of the BDF file to write.
+* `fName`: Name of the BDF file to write.
 * `data`: The nChannelsXnDataPoints array to be written to the BDF file
 * `trigChan`: The triggers to be written to the BDF file (1XnDataPoints)
 * `statusChan`: The status channel codes to be written to the BDF file (1XnDataPoints)
@@ -110,7 +112,7 @@ Split a BDF file at points marked by a trigger into multiple files
 
 ##### Args:
 
-* `fname`: Name of the BDF file to split.
+* `fName`: Name of the BDF file to split.
 * `trigger`: The trigger marking the split points.
 * `from`: Start time of data chunk to read (seconds).
 * `to`: End time of data chunk to read (seconds).
@@ -125,7 +127,7 @@ Split a BDF file at one or more time points into multiple files
 
 ##### Args:
 
-* `fname`: Name of the BDF file to split.
+* `fName`: Name of the BDF file to split.
 * `timeSeconds`: array listing the time(s) at which the BDF file should be split, in seconds.
   This can be either a single number or an array of time points.
 * `from`: Start time of data chunk to read (seconds).

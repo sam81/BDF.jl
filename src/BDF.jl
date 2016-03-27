@@ -221,7 +221,7 @@ Read the header of a BDF file
 
 ##### Returns:
 
-* `bdfInfo::Dict{ASCIIString,Any}`: dictionary with the following fields
+* `bdfInfo::Dict{ASCIIString,Any}`: dictionary with the following fields:
     * `idCode::ASCIIString`: Identification code
     * `subjID::`ASCIIString`: Local subject identification
     * `recID::ASCIIString`: Local recording identification
