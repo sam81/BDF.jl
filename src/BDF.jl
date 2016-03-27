@@ -33,7 +33,7 @@ Read the data from a BDF file
 dats, evtTab, trigChan, sysChan = readBDF("res1.bdf")
 ```
 """->
-function readBDF(fName::AbstractString; from::Real=0, to::Real=-1, channels::AbstractArray=[0], transposeData::Bool=false)
+function readBDF(fName::AbstractString; from::Real=0, to::Real=-1, channels::AbstractVector=[-1], transposeData::Bool=false)
 
     channels = unique(channels)
     if isa(channels, AbstractVector{ASCIIString})
@@ -46,7 +46,7 @@ function readBDF(fName::AbstractString; from::Real=0, to::Real=-1, channels::Abs
 end
 
 
-function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractArray{Int}=[0], transposeData::Bool=false)
+function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractVector{Int}=[-1], transposeData::Bool=false)
 
     if isa(fid, IOBuffer)
         fid.ptr = 1
@@ -79,7 +79,7 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractArray{Int
     duration = recordDuration*nDataRecords
 
     channels = unique(channels)
-    if channels == [0]
+    if channels == [-1]
         channels = 1:(nChannels-1)
     end
     nKeepChannels = length(channels)
