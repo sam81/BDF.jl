@@ -82,7 +82,7 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractArray{Int
     if channels == [0]
         channels = 1:(nChannels-1)
     end
-    nkeepchannels = length(channels)
+    nKeepChannels = length(channels)
 
     for i=1:nChannels
         chanLabels[i] = strip(ascii(read(fid, UInt8, 16)))
@@ -134,9 +134,9 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractArray{Int
     end
     recordsToRead = to - from
     if transposeData
-        data = Array(Int32, ((recordsToRead*nSampRec[1]), (nkeepchannels)))
+        data = Array(Int32, ((recordsToRead*nSampRec[1]), (nKeepChannels)))
     else
-        data = Array(Int32, ((nkeepchannels), (recordsToRead*nSampRec[1])))
+        data = Array(Int32, ((nKeepChannels), (recordsToRead*nSampRec[1])))
     end
     trigChan = Array(Int16, recordsToRead*nSampRec[1])
     sysCodeChan = Array(Int16,  recordsToRead*nSampRec[1])
@@ -148,10 +148,10 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractArray{Int
     if transposeData
         for n=1:recordsToRead
             for c=1:nChannels
-                cidx = findfirst(channels, c)
-                if (chanLabels[c] != "Status") & (cidx != 0)
+                cIdx = findfirst(channels, c)
+                if (chanLabels[c] != "Status") & (cIdx != 0)
                     for s=1:nSampRec[1]
-                        data[(n-1)*nSampRec[1]+s,cidx] = ((Int32(x[pos]) << 8) | (Int32(x[pos+1]) << 16) | (Int32(x[pos+2]) << 24) )>> 8
+                        data[(n-1)*nSampRec[1]+s,cIdx] = ((Int32(x[pos]) << 8) | (Int32(x[pos+1]) << 16) | (Int32(x[pos+2]) << 24) )>> 8
                         pos = pos+3
                     end
                 elseif chanLabels[c] == "Status"
@@ -171,10 +171,10 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractArray{Int
     else
         for n=1:recordsToRead
             for c=1:nChannels
-                cidx = findfirst(channels, c)
-                if (chanLabels[c] != "Status") & (cidx != 0)
+                cIdx = findfirst(channels, c)
+                if (chanLabels[c] != "Status") & (cIdx != 0)
                     for s=1:nSampRec[1]
-                        data[cidx,(n-1)*nSampRec[1]+s] = ((Int32(x[pos]) << 8) | (Int32(x[pos+1]) << 16) | (Int32(x[pos+2]) << 24) )>> 8
+                        data[cIdx,(n-1)*nSampRec[1]+s] = ((Int32(x[pos]) << 8) | (Int32(x[pos+1]) << 16) | (Int32(x[pos+2]) << 24) )>> 8
                         pos = pos+3
                     end
                 elseif chanLabels[c] == "Status"
