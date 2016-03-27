@@ -145,31 +145,53 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractArray{Int
     skip(fid, startPos)
     x = read(fid, UInt8, 3*recordsToRead*nChannels*nSampRec[1])
     pos = 1
-    for n=1:recordsToRead
-        for c=1:nChannels
-            cidx = findfirst(channels, c)
-            if (chanLabels[c] != "Status") & (cidx != 0)
-                for s=1:nSampRec[1]
-                    if transposedata
+    if transposedata
+        for n=1:recordsToRead
+            for c=1:nChannels
+                cidx = findfirst(channels, c)
+                if (chanLabels[c] != "Status") & (cidx != 0)
+                    for s=1:nSampRec[1]
                         data[(n-1)*nSampRec[1]+s,cidx] = ((Int32(x[pos]) << 8) | (Int32(x[pos+1]) << 16) | (Int32(x[pos+2]) << 24) )>> 8
-                    else
-                        data[cidx,(n-1)*nSampRec[1]+s] = ((Int32(x[pos]) << 8) | (Int32(x[pos+1]) << 16) | (Int32(x[pos+2]) << 24) )>> 8
+                        pos = pos+3
                     end
-                    pos = pos+3
-                end
-            elseif chanLabels[c] == "Status"
-                for s=1:nSampRec[1]
-                    trigChan[(n-1)*nSampRec[1]+s] = ((UInt16(x[pos])) | (UInt16(x[pos+1]) << 8)) & 255
-                    sysCodeChan[(n-1)*nSampRec[1]+s] = Int16(x[pos+2])
-                    pos = pos+3
-                end
-            else
-                # Channel not selected
-                for s=1:nSampRec[1]
-                    pos = pos+3
+                elseif chanLabels[c] == "Status"
+                    for s=1:nSampRec[1]
+                        trigChan[(n-1)*nSampRec[1]+s] = ((UInt16(x[pos])) | (UInt16(x[pos+1]) << 8)) & 255
+                        sysCodeChan[(n-1)*nSampRec[1]+s] = Int16(x[pos+2])
+                        pos = pos+3
+                    end
+                else
+                    # Channel not selected
+                    for s=1:nSampRec[1]
+                        pos = pos+3
+                    end
                 end
             end
         end
+    else
+        for n=1:recordsToRead
+            for c=1:nChannels
+                cidx = findfirst(channels, c)
+                if (chanLabels[c] != "Status") & (cidx != 0)
+                    for s=1:nSampRec[1]
+                        data[cidx,(n-1)*nSampRec[1]+s] = ((Int32(x[pos]) << 8) | (Int32(x[pos+1]) << 16) | (Int32(x[pos+2]) << 24) )>> 8
+                        pos = pos+3
+                    end
+                elseif chanLabels[c] == "Status"
+                    for s=1:nSampRec[1]
+                        trigChan[(n-1)*nSampRec[1]+s] = ((UInt16(x[pos])) | (UInt16(x[pos+1]) << 8)) & 255
+                        sysCodeChan[(n-1)*nSampRec[1]+s] = Int16(x[pos+2])
+                        pos = pos+3
+                    end
+                else
+                    # Channel not selected
+                    for s=1:nSampRec[1]
+                        pos = pos+3
+                    end
+                end
+            end
+        end
+
     end
     data = data*scaleFactor[1]
     close(fid)
