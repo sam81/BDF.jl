@@ -58,7 +58,7 @@ bdfInfo["duration"]
 Get the sampling rate of each channel:
 
 ```julia
-    bdfInfo["sampRate"]
+bdfInfo["sampRate"]
 ```
 
 Get the channel labels:
@@ -67,6 +67,12 @@ Get the channel labels:
 bdfInfo["chanLabels"]
 ```
 
+To read the information stored in the status channel you can use the `decodeStatusChannel` function
+
+```julia
+statusChanInfo = decodeStatusChannel(sysCodeChan)
+```
+this will return a dictionary with several arrays that indicate for each sample of the recordings whether CMS was in range, whether the battery charge was low, the speedmode of the system, and other information stored in the status channel.
 
 Beware that `BDF.jl` does not check that you have sufficient RAM to 
 read all the data in a BDF file. If you try to read a file that is
@@ -77,11 +83,4 @@ RAM that uses.
 ### Bugs
 
 Please, report any bugs on the project [issues page](https://github.com/sam81/BDF.jl/issues)
-
-#### Known Issues
-
-No particular attention has been given to decoding the information stored in the
-`sysCodeChan` (like CM in/out-of range, battery low/OK), suggestions on how to 
-handle this are welcome.
-
 

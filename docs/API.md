@@ -144,3 +144,31 @@ splitBDFAtTime("res1.bdf", 50)
 splitBDFAtTime("res2.bdf", [50, 100, 150])
 ```
 
+Decode the information stored in the status channel returned by `readBDF`
+
+##### Args:
+
+* `statusChannel`: the status channel as returned by `readBDF`
+
+##### Returns:
+
+* decodedStatusChannel: dictionary with five fields
+    * newEpoch: boolean array, `true` when a new epoch is started
+    * speedMode: int8 array, the current speed mode
+    * CMSInRange: boolean array, `true` when CMS is in range
+    * batteryLow : boolean array, `true` when battery is low
+    * isMK2: boolean array, `true` when system is MK2
+
+
+##### Examples:
+
+```julia
+dats, evtTab, trigChan, statusChan = readBDF("res1.bdf")
+statusChanInfo = decodeStatusChannel(statusChanInfo)
+if length(find(statusChanInfo["CMSInRange"] .== false)) > 0
+   println("CMS was not in range during at least some portions of the recording")
+else
+   println("CMS was in range during the whole recording")
+end
+```
+

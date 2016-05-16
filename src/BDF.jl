@@ -3,7 +3,7 @@ module BDF
 using Compat
 VERSION < v"0.4-" && using Docile
 
-export readBDF, readBDFHeader, writeBDF, splitBDFAtTime, splitBDFAtTrigger
+export readBDF, readBDFHeader, writeBDF, splitBDFAtTime, splitBDFAtTrigger, decodeStatusChannel
 
 @doc doc"""
 Read the data from a BDF file
@@ -867,5 +867,65 @@ function splitBDFAtTime{T<:Real}(fName::AbstractString, timeSeconds::Union{T, Ab
              prefilt=origHeader["prefilt"][1:end-1])
     end
 end
+
+@doc doc"""
+Decode the information stored in the status channel returned by `readBDF`
+
+##### Args:
+
+* `statusChannel`: the status channel as returned by `readBDF`
+
+##### Returns:
+
+* decodedStatusChannel: dictionary with five fields
+    * newEpoch: boolean array, `true` when a new epoch is started
+    * speedMode: int8 array, the current speed mode
+    * CMSInRange: boolean array, `true` when CMS is in range
+    * batteryLow : boolean array, `true` when battery is low
+    * isMK2: boolean array, `true` when system is MK2
+
+
+##### Examples:
+
+```julia
+dats, evtTab, trigChan, statusChan = readBDF("res1.bdf")
+statusChanInfo = decodeStatusChannel(statusChanInfo)
+if length(find(statusChanInfo["CMSInRange"] .== false)) > 0
+   println("CMS was not in range during at least some portions of the recording")
+else
+   println("CMS was in range during the whole recording")
+end
+```
+"""->
+
+function decodeStatusChannel(statusChannel::AbstractVector{Int16})
+    
+    n = length(statusChannel)
+    newEpoch = Array(Bool, n)
+    speedMode = Array(Int8, n)
+    CMSInRange = Array(Bool, n)
+    batteryLow = Array(Bool, n)
+    isMK2 = Array(Bool, n)
+    for i=1:n
+        x = bin(statusChannel[i])
+        newEpoch[i] = parse(Bool, x[8])
+        speedMode[i] = parse(Int, string(x[3],x[5],x[6],x[7]), 2)
+        CMSInRange[i] = parse(Bool, x[4])
+        batteryLow[i] = parse(Bool, x[2])
+        isMK2[i] = parse(Bool, x[1])
+    end
+
+    decodedStatusChannel = @compat Dict{ASCIIString,Any}("newEpoch" => newEpoch,
+                                                         "speedMode" => speedMode,
+                                                         "CMSInRange" => CMSInRange,
+                                                         "batteryLow" => batteryLow,
+                                                         "isMK2" => isMK2
+                                                         )
+
+    return decodedStatusChannel
+
+end  
+    
+
 
 end # module
