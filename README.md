@@ -1,3 +1,6 @@
+[![BDF](http://pkg.julialang.org/badges/BDF_0.4.svg)](http://pkg.julialang.org/?pkg=BDF)
+[![Coverage Status](https://coveralls.io/repos/github/sam81/BDF.jl/badge.svg?branch=master)](https://coveralls.io/github/sam81/BDF.jl?branch=master)
+
 `BDF.jl` is a Julia module to read/write BIOSEMI 24-bit [BDF](http://www.biosemi.com/faq/file_format.htm) files (used for storing electroencephalographic recordings)
 
 Usage:
