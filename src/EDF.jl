@@ -12,6 +12,7 @@ have the same sampling rate are supported. EDF annotations are not currently sup
 * `from`: Start time of data chunk to read (seconds).
 * `to`: End time of data chunk to read (seconds).
 * `channels`: Channels to read (indices or channel names).
+* `trigChanLabel`: The label of the channel containing triggers (if any). Default is "Status"
 * `transposeData`: If `true`, return transposed version of the `dats` array. Default is `false`.
 
 ##### Returns:
@@ -23,7 +24,6 @@ have the same sampling rate are supported. EDF annotations are not currently sup
     * idx: trigger indexes
     * dur: trigger durations
 * trigChannel: the raw trigger channel
-* syscodeChannel: the raw system codes channel
 
 
 ##### Examples:
