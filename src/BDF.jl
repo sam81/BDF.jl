@@ -133,6 +133,10 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractVector{In
         sampRate[i] = nSampRec[i]/recordDuration
     end
 
+    if length(unique(nSampRec)) > 1 #channels have different sampling rates
+        error("BDF files with channels having different sampling rates are not currently supported")
+    end
+
     if to < 1
         to = nDataRecords
     end
@@ -197,7 +201,17 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractVector{In
         end
 
     end
-    data = data*scaleFactor[1]
+
+    data = map(Float32, data)
+    if transposeData
+        for ch=1:size(data, 2)
+            data[:,ch] = data[:,ch]*scaleFactor[ch]
+        end
+    else
+        for ch=1:size(data, 1)
+            data[ch,:] = data[ch,:]*scaleFactor[ch]
+        end
+    end
     close(fid)
 
 
