@@ -3,7 +3,10 @@ module BDF
 using Compat
 VERSION < v"0.4-" && using Docile
 
-export readBDF, readBDFHeader, writeBDF, splitBDFAtTime, splitBDFAtTrigger, decodeStatusChannel
+export readBDF, readBDFHeader, writeBDF, splitBDFAtTime, splitBDFAtTrigger, decodeStatusChannel,
+readEDF, readEDFHeader
+
+include("EDF.jl")
 
 @doc doc"""
 Read the data from a BDF file
