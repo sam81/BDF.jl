@@ -57,16 +57,16 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractVector{In
     end
 
     idCodeNonASCII = read(fid, UInt8, 1)
-    idCode = ascii(read(fid, UInt8, 7))
-    subjID = ascii(read(fid, UInt8, 80))
-    recID = ascii(read(fid, UInt8, 80))
-    startDate = ascii(read(fid, UInt8, 8))
-    startTime = ascii(read(fid, UInt8, 8))
-    nBytes = parse(Int, ascii(read(fid, UInt8, 8)))
-    versionDataFormat = ascii(read(fid, UInt8, 44))
-    nDataRecords = parse(Int, ascii(read(fid, UInt8, 8)))
-    recordDuration = float(ascii(read(fid, UInt8, 8)))
-    nChannels = parse(Int, ascii(read(fid, UInt8, 4)))
+    idCode = ascii(String(read(fid, UInt8, 7)))
+    subjID = ascii(String(read(fid, UInt8, 80)))
+    recID = ascii(String(read(fid, UInt8, 80)))
+    startDate = ascii(String(read(fid, UInt8, 8)))
+    startTime = ascii(String(read(fid, UInt8, 8)))
+    nBytes = parse(Int, ascii(String(read(fid, UInt8, 8))))
+    versionDataFormat = ascii(String(read(fid, UInt8, 44)))
+    nDataRecords = parse(Int, ascii(String(read(fid, UInt8, 8))))
+    recordDuration = float(ascii(String(read(fid, UInt8, 8))))
+    nChannels = parse(Int, ascii(String(read(fid, UInt8, 4))))
     chanLabels = Array(Compat.ASCIIString, nChannels)
     transducer = Array(Compat.ASCIIString, nChannels)
     physDim = Array(Compat.ASCIIString, nChannels)
@@ -89,43 +89,43 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractVector{In
     nKeepChannels = length(channels)
 
     for i=1:nChannels
-        chanLabels[i] = strip(ascii(read(fid, UInt8, 16)))
+        chanLabels[i] = strip(ascii(String(read(fid, UInt8, 16))))
     end
 
     for i=1:nChannels
-        transducer[i] = strip(ascii(read(fid, UInt8, 80)))
+        transducer[i] = strip(ascii(String(read(fid, UInt8, 80))))
     end
 
     for i=1:nChannels
-        physDim[i] = strip(ascii(read(fid, UInt8, 8)))
+        physDim[i] = strip(ascii(String(read(fid, UInt8, 8))))
     end
 
     for i=1:nChannels
-        physMin[i] = parse(Int, ascii(read(fid, UInt8, 8)))
+        physMin[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
     end
 
     for i=1:nChannels
-        physMax[i] = parse(Int, ascii(read(fid, UInt8, 8)))
+        physMax[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
     end
 
     for i=1:nChannels
-        digMin[i] = parse(Int, ascii(read(fid, UInt8, 8)))
+        digMin[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
     end
 
     for i=1:nChannels
-        digMax[i] = parse(Int, ascii(read(fid, UInt8, 8)))
+        digMax[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
     end
 
     for i=1:nChannels
-        prefilt[i] = strip(ascii(read(fid, UInt8, 80)))
+        prefilt[i] = strip(ascii(String(read(fid, UInt8, 80))))
     end
 
     for i=1:nChannels
-        nSampRec[i] = parse(Int, ascii(read(fid, UInt8, 8)))
+        nSampRec[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
     end
 
     for i=1:nChannels
-        reserved[i] = strip(ascii(read(fid, UInt8, 32)))
+        reserved[i] = strip(ascii(String(read(fid, UInt8, 32))))
     end
 
     for i=1:nChannels
@@ -270,16 +270,16 @@ function readBDFHeader(fid::IO; fName::AbstractString="")
     end
 
     idCodeNonASCII = read(fid, UInt8, 1)
-    idCode = ascii(read(fid, UInt8, 7))
-    subjID = ascii(read(fid, UInt8, 80))
-    recID = ascii(read(fid, UInt8, 80))
-    startDate = ascii(read(fid, UInt8, 8))
-    startTime = ascii(read(fid, UInt8, 8))
-    nBytes = parse(Int, ascii(read(fid, UInt8, 8)))
-    versionDataFormat = ascii(read(fid, UInt8, 44))
-    nDataRecords = parse(Int, ascii(read(fid, UInt8, 8)))
-    recordDuration = float(ascii(read(fid, UInt8, 8)))
-    nChannels = parse(Int, ascii(read(fid, UInt8, 4)))
+    idCode = ascii(String(read(fid, UInt8, 7)))
+    subjID = ascii(String(read(fid, UInt8, 80)))
+    recID = ascii(String(read(fid, UInt8, 80)))
+    startDate = ascii(String(read(fid, UInt8, 8)))
+    startTime = ascii(String(read(fid, UInt8, 8)))
+    nBytes = parse(Int, ascii(String(read(fid, UInt8, 8))))
+    versionDataFormat = ascii(String(read(fid, UInt8, 44)))
+    nDataRecords = parse(Int, ascii(String(read(fid, UInt8, 8))))
+    recordDuration = float(ascii(String(read(fid, UInt8, 8))))
+    nChannels = parse(Int, ascii(String(read(fid, UInt8, 4))))
     chanLabels = Array(Compat.ASCIIString, nChannels)
     transducer = Array(Compat.ASCIIString, nChannels)
     physDim = Array(Compat.ASCIIString, nChannels)
@@ -296,43 +296,43 @@ function readBDFHeader(fid::IO; fName::AbstractString="")
     duration = recordDuration*nDataRecords
 
     for i=1:nChannels
-        chanLabels[i] = strip(ascii(read(fid, UInt8, 16)))
+        chanLabels[i] = strip(ascii(String(read(fid, UInt8, 16))))
     end
 
     for i=1:nChannels
-        transducer[i] = strip(ascii(read(fid, UInt8, 80)))
+        transducer[i] = strip(ascii(String(read(fid, UInt8, 80))))
     end
 
     for i=1:nChannels
-        physDim[i] = strip(ascii(read(fid, UInt8, 8)))
+        physDim[i] = strip(ascii(String(read(fid, UInt8, 8))))
     end
 
     for i=1:nChannels
-        physMin[i] = parse(Int, ascii(read(fid, UInt8, 8)))
+        physMin[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
     end
 
     for i=1:nChannels
-        physMax[i] = parse(Int, ascii(read(fid, UInt8, 8)))
+        physMax[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
     end
 
     for i=1:nChannels
-        digMin[i] = parse(Int, ascii(read(fid, UInt8, 8)))
+        digMin[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
     end
 
     for i=1:nChannels
-        digMax[i] = parse(Int, ascii(read(fid, UInt8, 8)))
+        digMax[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
     end
 
     for i=1:nChannels
-        prefilt[i] = strip(ascii(read(fid, UInt8, 80)))
+        prefilt[i] = strip(ascii(String(read(fid, UInt8, 80))))
     end
 
     for i=1:nChannels
-        nSampRec[i] = parse(Int, ascii(read(fid, UInt8, 8)))
+        nSampRec[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
     end
 
     for i=1:nChannels
-        reserved[i] = strip(ascii(read(fid, UInt8, 32)))
+        reserved[i] = strip(ascii(String(read(fid, UInt8, 32))))
     end
 
     for i=1:nChannels
@@ -899,7 +899,7 @@ end
 """->
 
 function decodeStatusChannel(statusChannel::AbstractVector{Int16})
-    
+
     n = length(statusChannel)
     newEpoch = Array(Bool, n)
     speedMode = Array(Int8, n)
@@ -924,8 +924,7 @@ function decodeStatusChannel(statusChannel::AbstractVector{Int16})
 
     return decodedStatusChannel
 
-end  
-    
+end
 
 
 end # module
