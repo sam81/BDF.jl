@@ -13,4 +13,4 @@ Usage:
 
 Documentation is available here:
 
-http://bdfjl.readthedocs.io/en/latest/
+http://samcarcagno.altervista.org/BDF/index.html
