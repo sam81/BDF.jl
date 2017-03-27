@@ -11,7 +11,7 @@ github: [https://github.com/sam81/BDF.jl](https://github.com/sam81/BDF.jl)
 
 It can be installed in Julia using
 
-```julia
+```{julia; eval=false}
 Pkg.add("BDF")
 ```
 
@@ -19,13 +19,13 @@ Pkg.add("BDF")
 
 Load the module
 
-```julia
+```{julia}
 using BDF
 ```
 
 To read an entire BDF recording
 
-```julia
+```{julia; eval=false}
 dats, evtTab, trigChan, sysCodeChan = readBDF("res1.bdf")
 ```
 
@@ -40,36 +40,36 @@ Additional Biosemi status codes (like CM in/out-of range, battery low/OK) are re
 
 You can also read only part of a recording, the following code will read the first 10 seconds of the recording:
 
-```julia
+```{julia; eval=false}
 dats, evtTab, trigChan, statChan = readBDF("res1.bdf", from=0, to=10) 
 ```    
 
 The `readBDFHeader` function can be used to get information on the BDF recording:
 
-```julia
+```{julia; eval=false}
 bdfInfo = readBDFHeader("res1.bdf")
 ```
 
 Get the duration of the recording:
 
-```julia
+```{julia; eval=false}
 bdfInfo["duration"]
 ```
 Get the sampling rate of each channel:
 
-```julia
+```{julia; eval=false}
 bdfInfo["sampRate"]
 ```
 
 Get the channel labels:
 
-```julia
+```{julia; eval=false}
 bdfInfo["chanLabels"]
 ```
 
 To read the information stored in the status channel you can use the `decodeStatusChannel` function
 
-```julia
+```{julia; eval=false}
 statusChanInfo = decodeStatusChannel(sysCodeChan)
 ```
 this will return a dictionary with several arrays that indicate for each sample of the recordings whether CMS was in range, whether the battery charge was low, the speedmode of the system, and other information stored in the status channel.

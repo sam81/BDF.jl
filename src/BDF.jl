@@ -1,12 +1,14 @@
 module BDF
 
-using Compat
+using Compat, DocStringExtensions
 VERSION < v"0.4-" && using Docile
 
 export readBDF, readBDFHeader, writeBDF, splitBDFAtTime, splitBDFAtTrigger, decodeStatusChannel
 
-@doc doc"""
+"""
 Read the data from a BDF file
+
+$(SIGNATURES)
 
 ##### Args:
 
@@ -36,7 +38,7 @@ dats, evtTab, trigChan, sysChan = readBDF("res1.bdf", channels=[1,3]) #read only
 dats, evtTab, trigChan, sysChan = readBDF("res1.bdf", channels=["Fz","RM"]) #read only channels Fz and RM
 dats, evtTab, trigChan, sysChan = readBDF("res1.bdf", transposeData=true) #return transposed data matrix (i.e. nDataPoints X nChannels)
 ```
-"""->
+"""
 function readBDF(fName::AbstractString; from::Real=0, to::Real=-1, channels::AbstractVector=[-1], transposeData::Bool=false)
 
     channels = unique(channels)
@@ -230,8 +232,10 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractVector{In
 end
 
 
-@doc doc"""
+"""
 Read the header of a BDF file
+
+$(SIGNATURES)
 
 ##### Args:
 
@@ -269,7 +273,7 @@ Read the header of a BDF file
 bdfInfo = readBDFHeader("res1.bdf")
 sampRate = bdfInfo["sampRate"][1]
 ```
-"""->
+"""
 
 function readBDFHeader(fName::AbstractString)
 
@@ -386,8 +390,10 @@ function readBDFHeader(fid::IO; fName::AbstractString="")
 
 end
 
-@doc doc"""
+"""
 Write a BDF file
+
+$(SIGNATURES)
 
 ##### Args:
 * `fName`: Name of the BDF file to write.
@@ -430,7 +436,7 @@ writeBDF("bdfRec.bdf", dats, trigs, statChan, sampRate)
 writeBDF("bdfRec.bdf", dats, trigs, statChan, sampRate, startDate="23.06.14",
 startTime="10.18.19")
 ```
-"""->
+"""
 function writeBDF{P<:Real, Q<:Real, R<:Real, S<:Compat.ASCIIString, T<:Compat.ASCIIString, U<:Compat.ASCIIString, V<:Real, W<:Real, Z<:Compat.ASCIIString}(fName::AbstractString, data::AbstractMatrix{P}, trigChan::AbstractVector{Q}, statusChan::AbstractVector{R}, sampRate::Integer; subjID::Compat.ASCIIString="",
                   recID::Compat.ASCIIString="", startDate::Compat.ASCIIString=Libc.strftime("%d.%m.%y", time()),  startTime::Compat.ASCIIString=Libc.strftime("%H.%M.%S", time()), versionDataFormat::Compat.ASCIIString="24BIT",
                   chanLabels::AbstractVector{S}=["" for i=1:size(data)[1]],
@@ -775,8 +781,10 @@ function writeBDF{P<:Real, Q<:Real, R<:Real, S<:Compat.ASCIIString, T<:Compat.AS
     close(fid)
 end
 
-@doc doc"""
-Split a BDF file at points marked by a trigger into multiple files
+"""
+Split a BDF file at points marked by a trigger into multiple files.
+
+$(SIGNATURES)
 
 ##### Args:
 
@@ -790,7 +798,7 @@ Split a BDF file at points marked by a trigger into multiple files
 ```julia
 splitBDFAtTrigger("res1.bdf", 202)
 ```
-"""->
+"""
 function splitBDFAtTrigger(fName::AbstractString, trigger::Integer; from::Real=0, to::Real=-1)
 
     data, evtTab, trigChan, sysCodeChan = readBDF(fName, from=from, to=to)
@@ -826,8 +834,10 @@ function splitBDFAtTrigger(fName::AbstractString, trigger::Integer; from::Real=0
     end
 end
 
-@doc doc"""
-Split a BDF file at one or more time points into multiple files
+"""
+Split a BDF file at one or more time points into multiple files.
+
+$(SIGNATURES)
 
 ##### Args:
 
@@ -843,7 +853,7 @@ Split a BDF file at one or more time points into multiple files
 splitBDFAtTime("res1.bdf", 50)
 splitBDFAtTime("res2.bdf", [50, 100, 150])
 ```
-"""->
+"""
 function splitBDFAtTime{T<:Real}(fName::AbstractString, timeSeconds::Union{T, AbstractVector{T}}; from::Real=0, to::Real=-1)
 
     data, evtTab, trigChan, sysCodeChan = readBDF(fName, from=from, to=to)
@@ -882,8 +892,10 @@ function splitBDFAtTime{T<:Real}(fName::AbstractString, timeSeconds::Union{T, Ab
     end
 end
 
-@doc doc"""
-Decode the information stored in the status channel returned by `readBDF`
+"""
+Decode the information stored in the status channel returned by `readBDF`.
+
+$(SIGNATURES)
 
 ##### Args:
 
@@ -910,7 +922,7 @@ else
    println("CMS was in range during the whole recording")
 end
 ```
-"""->
+"""
 
 function decodeStatusChannel(statusChannel::AbstractVector{Int16})
 
