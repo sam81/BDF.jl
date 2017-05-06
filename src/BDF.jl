@@ -1,7 +1,6 @@
 module BDF
 
 using Compat, DocStringExtensions
-VERSION < v"0.4-" && using Docile
 
 export readBDF, readBDFHeader, writeBDF, splitBDFAtTime, splitBDFAtTrigger, decodeStatusChannel
 
@@ -42,7 +41,7 @@ dats, evtTab, trigChan, sysChan = readBDF("res1.bdf", transposeData=true) #retur
 function readBDF(fName::AbstractString; from::Real=0, to::Real=-1, channels::AbstractVector=[-1], transposeData::Bool=false)
 
     channels = unique(channels)
-    if isa(channels, AbstractVector{Compat.ASCIIString})
+    if isa(channels, AbstractVector{String})
         bdfHeader = readBDFHeader(fName)
         channels = [findfirst(channels, c) for c in bdfHeader["chanLabels"]]
         channels = channels[channels .!= 0]
@@ -69,18 +68,18 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractVector{In
     nDataRecords = parse(Int, ascii(String(read(fid, UInt8, 8))))
     recordDuration = float(ascii(String(read(fid, UInt8, 8))))
     nChannels = parse(Int, ascii(String(read(fid, UInt8, 4))))
-    chanLabels = Array(Compat.ASCIIString, nChannels)
-    transducer = Array(Compat.ASCIIString, nChannels)
-    physDim = Array(Compat.ASCIIString, nChannels)
-    physMin = Array(Int32, nChannels)
-    physMax = Array(Int32, nChannels)
-    digMin = Array(Int32, nChannels)
-    digMax = Array(Int32, nChannels)
-    prefilt = Array(Compat.ASCIIString, nChannels)
-    nSampRec = Array(Int, nChannels)
-    reserved = Array(Compat.ASCIIString, nChannels)
-    scaleFactor = Array(Float32, nChannels)
-    sampRate = Array(Int, nChannels)
+    chanLabels = Array{String}(nChannels)
+    transducer = Array{String}(nChannels)
+    physDim = Array{String}(nChannels)
+    physMin = Array{Int32}(nChannels)
+    physMax = Array{Int32}(nChannels)
+    digMin = Array{Int32}(nChannels)
+    digMax = Array{Int32}(nChannels)
+    prefilt = Array{String}(nChannels)
+    nSampRec = Array{Int}(nChannels)
+    reserved = Array{String}(nChannels)
+    scaleFactor = Array{Float32}(nChannels)
+    sampRate = Array{Int}(nChannels)
 
     duration = recordDuration*nDataRecords
 
@@ -144,12 +143,12 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractVector{In
     end
     recordsToRead = to - from
     if transposeData
-        data = Array(Int32, ((recordsToRead*nSampRec[1]), (nKeepChannels)))
+        data = Array{Int32}((recordsToRead*nSampRec[1]), (nKeepChannels))
     else
-        data = Array(Int32, ((nKeepChannels), (recordsToRead*nSampRec[1])))
+        data = Array{Int32}((nKeepChannels), (recordsToRead*nSampRec[1]))
     end
-    trigChan = Array(Int16, recordsToRead*nSampRec[1])
-    sysCodeChan = Array(Int16,  recordsToRead*nSampRec[1])
+    trigChan = Array{Int16}(recordsToRead*nSampRec[1])
+    sysCodeChan = Array{Int16}(recordsToRead*nSampRec[1])
 
     startPos = 3*from*nChannels*nSampRec[1]
     skip(fid, startPos)
@@ -222,7 +221,7 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractVector{In
     trigDurs = (stopPoints - startPoints)/sampRate[1]
 
     evt = trigChan[startPoints]
-    evtTab = @compat Dict{Compat.ASCIIString,Any}("code" => evt,
+    evtTab = Dict{String,Any}("code" => evt,
                                       "idx" => startPoints,
                                       "dur" => trigDurs
                                       )
@@ -298,18 +297,18 @@ function readBDFHeader(fid::IO; fName::AbstractString="")
     nDataRecords = parse(Int, ascii(String(read(fid, UInt8, 8))))
     recordDuration = float(ascii(String(read(fid, UInt8, 8))))
     nChannels = parse(Int, ascii(String(read(fid, UInt8, 4))))
-    chanLabels = Array(Compat.ASCIIString, nChannels)
-    transducer = Array(Compat.ASCIIString, nChannels)
-    physDim = Array(Compat.ASCIIString, nChannels)
-    physMin = Array(Int32, nChannels)
-    physMax = Array(Int32, nChannels)
-    digMin = Array(Int32, nChannels)
-    digMax = Array(Int32, nChannels)
-    prefilt = Array(Compat.ASCIIString, nChannels)
-    nSampRec = Array(Int, nChannels)
-    reserved = Array(Compat.ASCIIString, nChannels)
-    scaleFactor = Array(Float32, nChannels)
-    sampRate = Array(Int, nChannels)
+    chanLabels = Array{String}(nChannels)
+    transducer = Array{String}(nChannels)
+    physDim = Array{String}(nChannels)
+    physMin = Array{Int32}(nChannels)
+    physMax = Array{Int32}(nChannels)
+    digMin = Array{Int32}(nChannels)
+    digMax = Array{Int32}(nChannels)
+    prefilt = Array{String}(nChannels)
+    nSampRec = Array{Int}(nChannels)
+    reserved = Array{String}(nChannels)
+    scaleFactor = Array{Float32}(nChannels)
+    sampRate = Array{Int}(nChannels)
 
     duration = recordDuration*nDataRecords
 
@@ -360,32 +359,32 @@ function readBDFHeader(fid::IO; fName::AbstractString="")
 
     close(fid)
 
-    d = @compat Dict{Compat.ASCIIString,Any}("fileName" => fName,
-                                 "idCodeNonASCII" => idCodeNonASCII,
-                                 "idCode" => idCode,
-                                 "subjID" => subjID,
-                                 "recID"  => recID,
-                                 "startDate" => startDate,
-                                 "startTime" => startTime,
-                                 "nBytes" => nBytes,
-                                 "versionDataFormat" => versionDataFormat,
-                                 "nDataRecords"  => nDataRecords,
-                                 "recordDuration" => recordDuration,
-                                 "nChannels"  => nChannels,
-                                 "chanLabels"  => chanLabels,
-                                 "transducer"  => transducer,
-                                 "physDim"=> physDim,
-                                 "physMin" => physMin,
-                                 "physMax" => physMax,
-                                 "digMin" => digMin,
-                                 "digMax" => digMax,
-                                 "prefilt" => prefilt,
-                                 "nSampRec" => nSampRec,
-                                 "reserved" => reserved,
-                                 "scaleFactor" => scaleFactor,
-                                 "sampRate" => sampRate,
-                                 "duration" => duration,
-                                 )
+    d = Dict{String,Any}("fileName" => fName,
+                         "idCodeNonASCII" => idCodeNonASCII,
+                         "idCode" => idCode,
+                         "subjID" => subjID,
+                         "recID"  => recID,
+                         "startDate" => startDate,
+                         "startTime" => startTime,
+                         "nBytes" => nBytes,
+                         "versionDataFormat" => versionDataFormat,
+                         "nDataRecords"  => nDataRecords,
+                         "recordDuration" => recordDuration,
+                         "nChannels"  => nChannels,
+                         "chanLabels"  => chanLabels,
+                         "transducer"  => transducer,
+                         "physDim"=> physDim,
+                         "physMin" => physMin,
+                         "physMax" => physMax,
+                         "digMin" => digMin,
+                         "digMax" => digMax,
+                         "prefilt" => prefilt,
+                         "nSampRec" => nSampRec,
+                         "reserved" => reserved,
+                         "scaleFactor" => scaleFactor,
+                         "sampRate" => sampRate,
+                         "duration" => duration,
+                         )
     return(d)
 
 end
@@ -437,8 +436,8 @@ writeBDF("bdfRec.bdf", dats, trigs, statChan, sampRate, startDate="23.06.14",
 startTime="10.18.19")
 ```
 """
-function writeBDF{P<:Real, Q<:Real, R<:Real, S<:Compat.ASCIIString, T<:Compat.ASCIIString, U<:Compat.ASCIIString, V<:Real, W<:Real, Z<:Compat.ASCIIString}(fName::AbstractString, data::AbstractMatrix{P}, trigChan::AbstractVector{Q}, statusChan::AbstractVector{R}, sampRate::Integer; subjID::Compat.ASCIIString="",
-                  recID::Compat.ASCIIString="", startDate::Compat.ASCIIString=Libc.strftime("%d.%m.%y", time()),  startTime::Compat.ASCIIString=Libc.strftime("%H.%M.%S", time()), versionDataFormat::Compat.ASCIIString="24BIT",
+function writeBDF{P<:Real, Q<:Real, R<:Real, S<:String, T<:String, U<:String, V<:Real, W<:Real, Z<:String}(fName::AbstractString, data::AbstractMatrix{P}, trigChan::AbstractVector{Q}, statusChan::AbstractVector{R}, sampRate::Integer; subjID::String="",
+                  recID::String="", startDate::String=Libc.strftime("%d.%m.%y", time()),  startTime::String=Libc.strftime("%H.%M.%S", time()), versionDataFormat::String="24BIT",
                   chanLabels::AbstractVector{S}=["" for i=1:size(data)[1]],
                   transducer::AbstractVector{T}=["" for i=1:size(data)[1]],
                   physDim::AbstractVector{U}=["" for i=1:size(data)[1]],
@@ -754,9 +753,9 @@ function writeBDF{P<:Real, Q<:Real, R<:Real, S<:Compat.ASCIIString, T<:Compat.AS
         dats[i,:] = dats[i,:] /scaleFactor[i]
     end
 
-    dats = round(Int32, dats) #need to pad dats
-    trigs = round(Int16, trigs)
-    statChan = round(Int16, statChan)
+    dats = round.(Int32, dats) #need to pad dats
+    trigs = round.(Int16, trigs)
+    statChan = round.(Int16, statChan)
     for n=1:nDataRecords
         for c=1:nChannels
             if c < nChannels
@@ -810,7 +809,7 @@ function splitBDFAtTrigger(fName::AbstractString, trigger::Integer; from::Real=0
     stopPoints =  [sepPoints; size(data)[2]]
 
     startDateTime = DateTime(string(origHeader["startDate"], ".", origHeader["startTime"]), "dd.mm.yy.HH.MM.SS")
-    timeSeconds = [0; round(Int, sepPoints.*sampRate)]
+    timeSeconds = [0; round.(Int, sepPoints.*sampRate)]
 
     for i=1:nChunks
         thisFname = joinpath(dirname(fName), basename(fName)[1:end-4] * "_" * string(i) * basename(fName)[end-3:end])
@@ -859,7 +858,7 @@ function splitBDFAtTime{T<:Real}(fName::AbstractString, timeSeconds::Union{T, Ab
     data, evtTab, trigChan, sysCodeChan = readBDF(fName, from=from, to=to)
     origHeader = readBDFHeader(fName)
     sampRate = origHeader["sampRate"][1] #assuming sampling rate is the same for all channels
-    sepPoints = round(Int, sampRate.*timeSeconds)
+    sepPoints = round.(Int, sampRate.*timeSeconds)
     for i=1:length(sepPoints)
         if sepPoints[i] > size(data)[2]
             error("Split point exceeds data points")
@@ -927,11 +926,11 @@ end
 function decodeStatusChannel(statusChannel::AbstractVector{Int16})
 
     n = length(statusChannel)
-    newEpoch = Array(Bool, n)
-    speedMode = Array(Int8, n)
-    CMSInRange = Array(Bool, n)
-    batteryLow = Array(Bool, n)
-    isMK2 = Array(Bool, n)
+    newEpoch = Array{Bool}(n)
+    speedMode = Array{Int8}(n)
+    CMSInRange = Array{Bool}(n)
+    batteryLow = Array{Bool}(n)
+    isMK2 = Array{Bool}(n)
     for i=1:n
         x = bin(statusChannel[i])
         newEpoch[i] = parse(Bool, x[8])
@@ -941,7 +940,7 @@ function decodeStatusChannel(statusChannel::AbstractVector{Int16})
         isMK2[i] = parse(Bool, x[1])
     end
 
-    decodedStatusChannel = @compat Dict{Compat.ASCIIString,Any}("newEpoch" => newEpoch,
+    decodedStatusChannel = Dict{String,Any}("newEpoch" => newEpoch,
                                                          "speedMode" => speedMode,
                                                          "CMSInRange" => CMSInRange,
                                                          "batteryLow" => batteryLow,
