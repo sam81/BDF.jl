@@ -11,7 +11,8 @@ for ci in ([1, 2, 3], [1, 2, 3, 4, 5, 6], 1:14, [1, 3, 9, 11, 15], [5, 2, 7])
     @test size(dats2, 2) == size(dats, 2)
     @test size(dats2, 1) == length(ci)
     
-    @test_approx_eq(dats[ci, :], dats2)
+    #@test_approx_eq(dats[ci, :], dats2)
+    @test isequal(dats[ci, :], dats2)
     @test statusChan2 == statusChan
         
 end
@@ -23,6 +24,8 @@ for (ci, el) in zip((["A1", "A2"], ["A1", "A3"], ["A3", "A1", "A11", "A16"]), ([
     @test size(dats2, 2) == size(dats, 2)
     @test size(dats2, 1) == length(ci)
     
-    @test_approx_eq(dats[el, :], dats2)
+    #@test_approx_eq(dats[el, :], dats2)
+    #@test_approx_eq(dats[el[1], 1], dats2[1,1])
+    @test isequal(dats[el, :], dats2)
     @test statusChan2 == statusChan
 end
