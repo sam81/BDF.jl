@@ -43,7 +43,7 @@ function readBDF(fName::AbstractString; from::Real=0, to::Real=-1, channels::Abs
     channels = unique(channels)
     if isa(channels, AbstractVector{String})
         bdfHeader = readBDFHeader(fName)
-        channels = [findfirst(channels, c) for c in bdfHeader["chanLabels"]]
+        channels = [findfirst(bdfHeader["chanLabels"], c) for c in channels]
         channels = channels[channels .!= 0]
     end
 
