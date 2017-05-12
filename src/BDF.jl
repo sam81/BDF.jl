@@ -1,7 +1,6 @@
 module BDF
 
 using Compat, DocStringExtensions
-VERSION < v"0.4-" && using Docile
 
 export readBDF, readBDFHeader, writeBDF, splitBDFAtTime, splitBDFAtTrigger, decodeStatusChannel
 
