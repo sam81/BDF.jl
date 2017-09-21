@@ -791,6 +791,7 @@ $(SIGNATURES)
 * `trigger`: The trigger marking the split points.
 * `from`: Start time of data chunk to read (seconds).
 * `to`: End time of data chunk to read (seconds).
+* `minTrigDur`: minimum duration of the trigger event, in seconds. Certain custom hardware configuration can generate spurious triggers that have a very short duration. The function will only split the file a triggers that last at least as long as `minTrigDur`, allowing to filter out spurious short triggers.
 
 ##### Examples:
 
@@ -798,12 +799,12 @@ $(SIGNATURES)
 splitBDFAtTrigger("res1.bdf", 202)
 ```
 """
-function splitBDFAtTrigger(fName::AbstractString, trigger::Integer; from::Real=0, to::Real=-1)
+function splitBDFAtTrigger(fName::AbstractString, trigger::Integer; from::Real=0, to::Real=-1, minTrigDur=0)
 
     data, evtTab, trigChan, sysCodeChan = readBDF(fName, from=from, to=to)
     origHeader = readBDFHeader(fName)
     sampRate = origHeader["sampRate"][1] #assuming sampling rate is the same for all channels
-    sepPoints = evtTab["idx"][find(evtTab["code"] .== trigger)]
+    sepPoints = evtTab["idx"][find((evtTab["code"] .== trigger) .& (evtTab["dur"] .>= minTrigDur))]
     nChunks = length(sepPoints)+1
     startPoints = [1;         sepPoints.+1]
     stopPoints =  [sepPoints; size(data)[2]]
