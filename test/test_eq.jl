@@ -1,4 +1,4 @@
-using BDF, Base.Test, HDF5
+using BDF, Compat.Test, HDF5
 #using JLD
 
 origFilePath = joinpath(dirname(@__FILE__), "Newtest17-256.bdf")

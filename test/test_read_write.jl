@@ -1,4 +1,4 @@
-using BDF, Base.Test
+using BDF, Compat.Test
 
 #test BDF read and write
 origFilePath = joinpath(dirname(@__FILE__), "Newtest17-256.bdf")

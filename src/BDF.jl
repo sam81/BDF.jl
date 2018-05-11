@@ -1,6 +1,6 @@
 module BDF
 
-using Compat, DocStringExtensions
+using Compat, DocStringExtensions, Compat.Dates
 
 export readBDF, readBDFHeader, writeBDF, splitBDFAtTime, splitBDFAtTrigger, decodeStatusChannel
 
@@ -43,7 +43,7 @@ function readBDF(fName::AbstractString; from::Real=0, to::Real=-1, channels::Abs
     channels = unique(channels)
     if isa(channels, AbstractVector{String})
         bdfHeader = readBDFHeader(fName)
-        channels = [findfirst(bdfHeader["chanLabels"], c) for c in channels]
+        channels = [coalesce(findfirst(isequal(c), bdfHeader["chanLabels"]), 0) for c in channels]
         channels = channels[channels .!= 0]
     end
 
@@ -57,29 +57,29 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractVector{In
         fid.ptr = 1
     end
 
-    idCodeNonASCII = read(fid, UInt8, 1)
-    idCode = ascii(String(read(fid, UInt8, 7)))
-    subjID = ascii(String(read(fid, UInt8, 80)))
-    recID = ascii(String(read(fid, UInt8, 80)))
-    startDate = ascii(String(read(fid, UInt8, 8)))
-    startTime = ascii(String(read(fid, UInt8, 8)))
-    nBytes = parse(Int, ascii(String(read(fid, UInt8, 8))))
-    versionDataFormat = ascii(String(read(fid, UInt8, 44)))
-    nDataRecords = parse(Int, ascii(String(read(fid, UInt8, 8))))
-    recordDuration = float(ascii(String(read(fid, UInt8, 8))))
-    nChannels = parse(Int, ascii(String(read(fid, UInt8, 4))))
-    chanLabels = Array{String}(nChannels)
-    transducer = Array{String}(nChannels)
-    physDim = Array{String}(nChannels)
-    physMin = Array{Int32}(nChannels)
-    physMax = Array{Int32}(nChannels)
-    digMin = Array{Int32}(nChannels)
-    digMax = Array{Int32}(nChannels)
-    prefilt = Array{String}(nChannels)
-    nSampRec = Array{Int}(nChannels)
-    reserved = Array{String}(nChannels)
-    scaleFactor = Array{Float32}(nChannels)
-    sampRate = Array{Int}(nChannels)
+    idCodeNonASCII = read!(fid, Array{UInt8}(undef, 1))
+    idCode = ascii(String(read!(fid, Array{UInt8}(undef, 7))))
+    subjID = ascii(String(read!(fid, Array{UInt8}(undef, 80))))
+    recID = ascii(String(read!(fid, Array{UInt8}(undef, 80))))
+    startDate = ascii(String(read!(fid, Array{UInt8}(undef, 8))))
+    startTime = ascii(String(read!(fid, Array{UInt8}(undef, 8))))
+    nBytes = parse(Int, ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
+    versionDataFormat = ascii(String(read!(fid, Array{UInt8}(undef, 44))))
+    nDataRecords = parse(Int, ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
+    recordDuration = parse(Float64, ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
+    nChannels = parse(Int, ascii(String(read!(fid, Array{UInt8}(undef, 4)))))
+    chanLabels = Array{String}(undef, nChannels)
+    transducer = Array{String}(undef, nChannels)
+    physDim = Array{String}(undef, nChannels)
+    physMin = Array{Int32}(undef, nChannels)
+    physMax = Array{Int32}(undef, nChannels)
+    digMin = Array{Int32}(undef, nChannels)
+    digMax = Array{Int32}(undef, nChannels)
+    prefilt = Array{String}(undef, nChannels)
+    nSampRec = Array{Int}(undef, nChannels)
+    reserved = Array{String}(undef, nChannels)
+    scaleFactor = Array{Float32}(undef, nChannels)
+    sampRate = Array{Int}(undef, nChannels)
 
     duration = recordDuration*nDataRecords
 
@@ -90,43 +90,43 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractVector{In
     nKeepChannels = length(channels)
 
     for i=1:nChannels
-        chanLabels[i] = strip(ascii(String(read(fid, UInt8, 16))))
+        chanLabels[i] = strip(ascii(String(read!(fid, Array{UInt8}(undef, 16)))))
     end
 
     for i=1:nChannels
-        transducer[i] = strip(ascii(String(read(fid, UInt8, 80))))
+        transducer[i] = strip(ascii(String(read!(fid, Array{UInt8}(undef, 80)))))
     end
 
     for i=1:nChannels
-        physDim[i] = strip(ascii(String(read(fid, UInt8, 8))))
+        physDim[i] = strip(ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
     end
 
     for i=1:nChannels
-        physMin[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
+        physMin[i] = parse(Int, ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
     end
 
     for i=1:nChannels
-        physMax[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
+        physMax[i] = parse(Int, ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
     end
 
     for i=1:nChannels
-        digMin[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
+        digMin[i] = parse(Int, ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
     end
 
     for i=1:nChannels
-        digMax[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
+        digMax[i] = parse(Int, ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
     end
 
     for i=1:nChannels
-        prefilt[i] = strip(ascii(String(read(fid, UInt8, 80))))
+        prefilt[i] = strip(ascii(String(read!(fid, Array{UInt8}(undef, 80)))))
     end
 
     for i=1:nChannels
-        nSampRec[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
+        nSampRec[i] = parse(Int, ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
     end
 
     for i=1:nChannels
-        reserved[i] = strip(ascii(String(read(fid, UInt8, 32))))
+        reserved[i] = strip(ascii(String(read!(fid, Array{UInt8}(undef, 32)))))
     end
 
     for i=1:nChannels
@@ -143,21 +143,21 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractVector{In
     end
     recordsToRead = to - from
     if transposeData
-        data = Array{Int32}((recordsToRead*nSampRec[1]), (nKeepChannels))
+        data = Array{Int32}(undef, (recordsToRead*nSampRec[1]), (nKeepChannels))
     else
-        data = Array{Int32}((nKeepChannels), (recordsToRead*nSampRec[1]))
+        data = Array{Int32}(undef, (nKeepChannels), (recordsToRead*nSampRec[1]))
     end
-    trigChan = Array{Int16}(recordsToRead*nSampRec[1])
-    sysCodeChan = Array{Int16}(recordsToRead*nSampRec[1])
+    trigChan = Array{Int16}(undef, recordsToRead*nSampRec[1])
+    sysCodeChan = Array{Int16}(undef, recordsToRead*nSampRec[1])
 
     startPos = 3*from*nChannels*nSampRec[1]
     skip(fid, startPos)
-    x = read(fid, UInt8, 3*recordsToRead*nChannels*nSampRec[1])
+    x = read!(fid, Array{UInt8}(undef, 3*recordsToRead*nChannels*nSampRec[1]))
     pos = 1
     if transposeData
         for n=1:recordsToRead
             for c=1:nChannels
-                cIdx = findfirst(channels, c)
+                cIdx = coalesce(findfirst(isequal(c), channels), 0) 
                 if (chanLabels[c] != "Status") & (cIdx != 0)
                     for s=1:nSampRec[1]
                         data[(n-1)*nSampRec[1]+s,cIdx] = ((Int32(x[pos]) << 8) | (Int32(x[pos+1]) << 16) | (Int32(x[pos+2]) << 24) )>> 8
@@ -180,7 +180,7 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractVector{In
     else
         for n=1:recordsToRead
             for c=1:nChannels
-                cIdx = findfirst(channels, c)
+                cIdx = coalesce(findfirst(isequal(c), channels), 0)
                 if (chanLabels[c] != "Status") & (cIdx != 0)
                     for s=1:nSampRec[1]
                         data[cIdx,(n-1)*nSampRec[1]+s] = ((Int32(x[pos]) << 8) | (Int32(x[pos+1]) << 16) | (Int32(x[pos+2]) << 24) )>> 8
@@ -216,8 +216,8 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractVector{In
     close(fid)
 
 
-    startPoints = vcat(1, find(diff(trigChan) .!= 0).+1)
-    stopPoints = vcat(find(diff(trigChan) .!= 0), length(trigChan))
+    startPoints = vcat(1, findall(diff(trigChan) .!= 0).+1)
+    stopPoints = vcat(findall(diff(trigChan) .!= 0), length(trigChan))
     trigDurs = (stopPoints - startPoints)/sampRate[1]
 
     evt = trigChan[startPoints]
@@ -273,7 +273,6 @@ bdfInfo = readBDFHeader("res1.bdf")
 sampRate = bdfInfo["sampRate"][1]
 ```
 """
-
 function readBDFHeader(fName::AbstractString)
 
     readBDFHeader(open(fName, "r"), fName=fName)
@@ -286,70 +285,70 @@ function readBDFHeader(fid::IO; fName::AbstractString="")
         fid.ptr = 1
     end
 
-    idCodeNonASCII = read(fid, UInt8, 1)
-    idCode = ascii(String(read(fid, UInt8, 7)))
-    subjID = ascii(String(read(fid, UInt8, 80)))
-    recID = ascii(String(read(fid, UInt8, 80)))
-    startDate = ascii(String(read(fid, UInt8, 8)))
-    startTime = ascii(String(read(fid, UInt8, 8)))
-    nBytes = parse(Int, ascii(String(read(fid, UInt8, 8))))
-    versionDataFormat = ascii(String(read(fid, UInt8, 44)))
-    nDataRecords = parse(Int, ascii(String(read(fid, UInt8, 8))))
-    recordDuration = float(ascii(String(read(fid, UInt8, 8))))
-    nChannels = parse(Int, ascii(String(read(fid, UInt8, 4))))
-    chanLabels = Array{String}(nChannels)
-    transducer = Array{String}(nChannels)
-    physDim = Array{String}(nChannels)
-    physMin = Array{Int32}(nChannels)
-    physMax = Array{Int32}(nChannels)
-    digMin = Array{Int32}(nChannels)
-    digMax = Array{Int32}(nChannels)
-    prefilt = Array{String}(nChannels)
-    nSampRec = Array{Int}(nChannels)
-    reserved = Array{String}(nChannels)
-    scaleFactor = Array{Float32}(nChannels)
-    sampRate = Array{Int}(nChannels)
+    idCodeNonASCII = read!(fid, Array{UInt8}(undef, 1))
+    idCode = ascii(String(read!(fid, Array{UInt8}(undef, 7))))
+    subjID = ascii(String(read!(fid, Array{UInt8}(undef, 80))))
+    recID = ascii(String(read!(fid, Array{UInt8}(undef, 80))))
+    startDate = ascii(String(read!(fid, Array{UInt8}(undef, 8))))
+    startTime = ascii(String(read!(fid, Array{UInt8}(undef, 8))))
+    nBytes = parse(Int, ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
+    versionDataFormat = ascii(String(read!(fid, Array{UInt8}(undef, 44))))
+    nDataRecords = parse(Int, ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
+    recordDuration = parse(Float64, ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
+    nChannels = parse(Int, ascii(String(read!(fid, Array{UInt8}(undef, 4)))))
+    chanLabels = Array{String}(undef, nChannels)
+    transducer = Array{String}(undef, nChannels)
+    physDim = Array{String}(undef, nChannels)
+    physMin = Array{Int32}(undef, nChannels)
+    physMax = Array{Int32}(undef, nChannels)
+    digMin = Array{Int32}(undef, nChannels)
+    digMax = Array{Int32}(undef, nChannels)
+    prefilt = Array{String}(undef, nChannels)
+    nSampRec = Array{Int}(undef, nChannels)
+    reserved = Array{String}(undef, nChannels)
+    scaleFactor = Array{Float32}(undef, nChannels)
+    sampRate = Array{Int}(undef, nChannels)
 
     duration = recordDuration*nDataRecords
 
     for i=1:nChannels
-        chanLabels[i] = strip(ascii(String(read(fid, UInt8, 16))))
+        chanLabels[i] = strip(ascii(String(read!(fid, Array{UInt8}(undef, 16)))))
     end
 
     for i=1:nChannels
-        transducer[i] = strip(ascii(String(read(fid, UInt8, 80))))
+        transducer[i] = strip(ascii(String(read!(fid, Array{UInt8}(undef, 80)))))
     end
 
     for i=1:nChannels
-        physDim[i] = strip(ascii(String(read(fid, UInt8, 8))))
+        physDim[i] = strip(ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
     end
 
     for i=1:nChannels
-        physMin[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
+        physMin[i] = parse(Int, ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
     end
 
     for i=1:nChannels
-        physMax[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
+        physMax[i] = parse(Int, ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
     end
 
     for i=1:nChannels
-        digMin[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
+        digMin[i] = parse(Int, ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
     end
 
     for i=1:nChannels
-        digMax[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
+        digMax[i] = parse(Int, ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
     end
 
     for i=1:nChannels
-        prefilt[i] = strip(ascii(String(read(fid, UInt8, 80))))
+        prefilt[i] = strip(ascii(String(read!(fid, Array{UInt8}(undef, 80)))))
     end
 
     for i=1:nChannels
-        nSampRec[i] = parse(Int, ascii(String(read(fid, UInt8, 8))))
+        nSampRec[i] = parse(Int, ascii(String(read!(fid, Array{UInt8}(undef, 8)))))
     end
 
     for i=1:nChannels
-        reserved[i] = strip(ascii(String(read(fid, UInt8, 32))))
+        reserved[i] = strip(ascii(String(read!(fid, Array{UInt8}(undef, 32)))))
     end
 
     for i=1:nChannels
@@ -437,7 +436,7 @@ writeBDF("bdfRec.bdf", dats, trigs, statChan, sampRate, startDate="23.06.14",
 startTime="10.18.19")
 ```
 """
-function writeBDF{P<:Real, Q<:Real, R<:Real, S<:String, T<:String, U<:String, V<:Real, W<:Real, Z<:String, O<:String}(fName::AbstractString, data::AbstractMatrix{P}, trigChan::AbstractVector{Q}, statusChan::AbstractVector{R}, sampRate::Integer; subjID::String="",
+function writeBDF(fName::AbstractString, data::AbstractMatrix{P}, trigChan::AbstractVector{Q}, statusChan::AbstractVector{R}, sampRate::Integer; subjID::String="",
                   recID::String="", startDate::String=Libc.strftime("%d.%m.%y", time()),  startTime::String=Libc.strftime("%H.%M.%S", time()), versionDataFormat::String="24BIT",
                   chanLabels::AbstractVector{S}=["" for i=1:size(data)[1]],
                   transducer::AbstractVector{T}=["" for i=1:size(data)[1]],
@@ -445,7 +444,7 @@ function writeBDF{P<:Real, Q<:Real, R<:Real, S<:String, T<:String, U<:String, V<
                   physMin::AbstractVector{V}=[-262144 for i=1:size(data)[1]],
                   physMax::AbstractVector{W}=[262144 for i=1:size(data)[1]],
                   prefilt::AbstractVector{Z}=["" for i=1:size(data)[1]],
-                  reserved::AbstractVector{O}=["Reserved" for i=1:size(data)[1]])
+                  reserved::AbstractVector{O}=["Reserved" for i=1:size(data)[1]]) where {P<:Real, Q<:Real, R<:Real, S<:String, T<:String, U<:String, V<:Real, W<:Real, Z<:String, O<:String}
 
     #check data values within physMin physMax range
     for i=1:size(data)[1]
@@ -814,7 +813,7 @@ function splitBDFAtTrigger(fName::AbstractString, trigger::Integer; from::Real=0
     data, evtTab, trigChan, sysCodeChan = readBDF(fName, from=from, to=to)
     origHeader = readBDFHeader(fName)
     sampRate = origHeader["sampRate"][1] #assuming sampling rate is the same for all channels
-    sepPoints = evtTab["idx"][find((evtTab["code"] .== trigger) .& (evtTab["dur"] .>= minTrigDur))]
+    sepPoints = evtTab["idx"][findall((evtTab["code"] .== trigger) .& (evtTab["dur"] .>= minTrigDur))]
     nChunks = length(sepPoints)+1
     startPoints = [1;         sepPoints.+1]
     stopPoints =  [sepPoints; size(data)[2]]
@@ -864,7 +863,7 @@ splitBDFAtTime("res1.bdf", 50)
 splitBDFAtTime("res2.bdf", [50, 100, 150])
 ```
 """
-function splitBDFAtTime{T<:Real}(fName::AbstractString, timeSeconds::Union{T, AbstractVector{T}}; from::Real=0, to::Real=-1)
+function splitBDFAtTime(fName::AbstractString, timeSeconds::Union{T, AbstractVector{T}}; from::Real=0, to::Real=-1) where T <: Real
 
     data, evtTab, trigChan, sysCodeChan = readBDF(fName, from=from, to=to)
     origHeader = readBDFHeader(fName)
@@ -926,26 +925,25 @@ $(SIGNATURES)
 ```julia
 dats, evtTab, trigChan, statusChan = readBDF("res1.bdf")
 statusChanInfo = decodeStatusChannel(statusChanInfo)
-if length(find(statusChanInfo["CMSInRange"] .== false)) > 0
+if length(findall(statusChanInfo["CMSInRange"] .== false)) > 0
    println("CMS was not in range during at least some portions of the recording")
 else
    println("CMS was in range during the whole recording")
 end
 ```
 """
-
 function decodeStatusChannel(statusChannel::AbstractVector{Int16})
 
     n = length(statusChannel)
-    newEpoch = Array{Bool}(n)
-    speedMode = Array{Int8}(n)
-    CMSInRange = Array{Bool}(n)
-    batteryLow = Array{Bool}(n)
-    isMK2 = Array{Bool}(n)
+    newEpoch = Array{Bool}(undef, n)
+    speedMode = Array{Int8}(undef, n)
+    CMSInRange = Array{Bool}(undef, n)
+    batteryLow = Array{Bool}(undef, n)
+    isMK2 = Array{Bool}(undef, n)
     for i=1:n
-        x = bin(statusChannel[i])
+        x = string(statusChannel[i], base=2)
         newEpoch[i] = parse(Bool, x[8])
-        speedMode[i] = parse(Int, string(x[3],x[5],x[6],x[7]), 2)
+        speedMode[i] = parse(Int, string(x[3],x[5],x[6],x[7]), base=2)
         CMSInRange[i] = parse(Bool, x[4])
         batteryLow[i] = parse(Bool, x[2])
         isMK2[i] = parse(Bool, x[1])

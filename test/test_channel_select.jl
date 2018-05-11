@@ -1,4 +1,4 @@
-using BDF, Base.Test
+using BDF, Compat.Test
 
 origFilePath = joinpath(dirname(@__FILE__), "Newtest17-256.bdf")
 
@@ -6,7 +6,7 @@ dats, evtTab, trigs, statusChan = readBDF(origFilePath)
 
 for ci in ([1, 2, 3], [1, 2, 3, 4, 5, 6], 1:14, [1, 3, 9, 11, 15], [5, 2, 7])
 
-    dats2, evtTab2, trigs2, statusChan2 = readBDF(origFilePath, channels = ci)
+    local dats2, evtTab2, trigs2, statusChan2 = readBDF(origFilePath, channels = ci)
 
     @test size(dats2, 2) == size(dats, 2)
     @test size(dats2, 1) == length(ci)
@@ -19,7 +19,7 @@ end
 
 for (chanLabs, chanNum) in zip((["A1", "A2"], ["A1", "A3"], ["A3", "A1", "A11", "A16"]), ([1, 2], [1, 3], [3, 1, 11, 16]))
 
-    dats2, evtTab2, trigs2, statusChan2 = readBDF(origFilePath, channels = chanLabs)
+    local dats2, evtTab2, trigs2, statusChan2 = readBDF(origFilePath, channels = chanLabs)
     
     @test size(dats2, 2) == size(dats, 2)
     @test size(dats2, 1) == length(chanLabs)

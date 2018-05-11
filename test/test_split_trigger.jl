@@ -1,4 +1,4 @@
-using BDF, Base.Test
+using BDF, Compat.Test
 
 #test split BDF at trigger
 
