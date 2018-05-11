@@ -411,6 +411,7 @@ $(SIGNATURES)
 * `physMin`: Array of physical minimum in units of physical dimension (1 for each channel)
 * `physMax`: Array of physical maximum in units of physical dimension (1 for each channel)
 * `prefilt`: Array of prefilter settings (1 for each channel)
+* `reserved`: Array of "reserved" field (1 for each data channel + 1 for the status channel)
 
 #####  Notes:
 
@@ -436,14 +437,15 @@ writeBDF("bdfRec.bdf", dats, trigs, statChan, sampRate, startDate="23.06.14",
 startTime="10.18.19")
 ```
 """
-function writeBDF{P<:Real, Q<:Real, R<:Real, S<:String, T<:String, U<:String, V<:Real, W<:Real, Z<:String}(fName::AbstractString, data::AbstractMatrix{P}, trigChan::AbstractVector{Q}, statusChan::AbstractVector{R}, sampRate::Integer; subjID::String="",
+function writeBDF{P<:Real, Q<:Real, R<:Real, S<:String, T<:String, U<:String, V<:Real, W<:Real, Z<:String, O<:String}(fName::AbstractString, data::AbstractMatrix{P}, trigChan::AbstractVector{Q}, statusChan::AbstractVector{R}, sampRate::Integer; subjID::String="",
                   recID::String="", startDate::String=Libc.strftime("%d.%m.%y", time()),  startTime::String=Libc.strftime("%H.%M.%S", time()), versionDataFormat::String="24BIT",
                   chanLabels::AbstractVector{S}=["" for i=1:size(data)[1]],
                   transducer::AbstractVector{T}=["" for i=1:size(data)[1]],
                   physDim::AbstractVector{U}=["" for i=1:size(data)[1]],
                   physMin::AbstractVector{V}=[-262144 for i=1:size(data)[1]],
                   physMax::AbstractVector{W}=[262144 for i=1:size(data)[1]],
-                  prefilt::AbstractVector{Z}=["" for i=1:size(data)[1]])
+                  prefilt::AbstractVector{Z}=["" for i=1:size(data)[1]],
+                  reserved::AbstractVector{O}=["Reserved" for i=1:size(data)[1]])
 
     #check data values within physMin physMax range
     for i=1:size(data)[1]
@@ -734,13 +736,21 @@ function writeBDF{P<:Real, Q<:Real, R<:Real, S<:String, T<:String, U<:String, V<
         end
     end
 
-    #reserved
-    for j=1:nChannels
-        reservedString = "Reserved"
-        for i=1:length(reservedString)
-            write(fid, UInt8(reservedString[i]))
+    #Reserved
+    if length(reserved) > nChannels 
+        println("Number of reserved greater than number of channels+1, truncating!")
+        reserved = reserved[1:nChannels]
+    end
+    if length(reserved) < nChannels
+        #println("Warning: number of chanLabels less than number of channels!")
+        reserved = vcat(reserved, ["Reserved" for k=1:(nChannels)-length(reserved)])
+
+    end
+    for j=1:length(reserved)
+        for i=1:length(reserved[j])
+            write(fid, UInt8(reserved[j][i]))
         end
-        for i=1:(32-length(reservedString))
+        for i=1:(32-length(reserved[j]))
             write(fid, Char(' '))
         end
     end

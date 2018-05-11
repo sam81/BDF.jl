@@ -15,7 +15,9 @@ writeBDF(copyFilePath, dats, trigs, statusChan, bdfHeader["sampRate"][1],
          physDim=bdfHeader["physDim"][1:end-1],
          physMin=bdfHeader["physMin"][1:end-1],
          physMax=bdfHeader["physMax"][1:end-1],
-         prefilt=bdfHeader["prefilt"][1:end-1])
+         prefilt=bdfHeader["prefilt"][1:end-1],
+         reserved=bdfHeader["reserved"])
+
 bdfHeader2 = readBDFHeader(copyFilePath)
 dats2, evtTab2, trigs2, statusChan2 = readBDF(copyFilePath)
 rm(copyFilePath)
