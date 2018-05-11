@@ -1,12 +1,12 @@
  
 # Introduction
 
-``BDF.jl`` is a julia module to read BIOSEMI 24-bit [BDF files](http://www.biosemi.com/faq/file_format.htm).
+`BDF.jl` is a julia module to read BIOSEMI 24-bit [BDF files](http://www.biosemi.com/faq/file_format.htm).
 
 
 ## Download and Installation
 
-The source code of ``BDF.jl`` is hosted on
+The source code of `BDF.jl` is hosted on
 github: [https://github.com/sam81/BDF.jl](https://github.com/sam81/BDF.jl)
 
 It can be installed in Julia using
