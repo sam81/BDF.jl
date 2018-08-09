@@ -43,8 +43,16 @@ function readBDF(fName::AbstractString; from::Real=0, to::Real=-1, channels::Abs
     channels = unique(channels)
     if isa(channels, AbstractVector{String})
         bdfHeader = readBDFHeader(fName)
-        channels = [coalesce(findfirst(isequal(c), bdfHeader["chanLabels"]), 0) for c in channels]
-        channels = channels[channels .!= 0]
+
+        for c in channels
+            if findfirst(isequal(c), bdfHeader["chanLabels"]) == nothing
+                #one of the requested channels not in channel labels
+                error(string("Channel ", c, " not found among BDF file channel labels"))
+            end
+        end
+
+        channels = [findfirst(isequal(c), bdfHeader["chanLabels"]) for c in channels]
+
     end
 
     readBDF(open(fName, "r"), from=from, to=to, channels=channels, transposeData=transposeData)
@@ -157,8 +165,8 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractVector{In
     if transposeData
         for n=1:recordsToRead
             for c=1:nChannels
-                cIdx = coalesce(findfirst(isequal(c), channels), 0) 
-                if (chanLabels[c] != "Status") & (cIdx != 0)
+                cIdx = findfirst(isequal(c), channels)
+                if (chanLabels[c] != "Status") & (cIdx != nothing)
                     for s=1:nSampRec[1]
                         data[(n-1)*nSampRec[1]+s,cIdx] = ((Int32(x[pos]) << 8) | (Int32(x[pos+1]) << 16) | (Int32(x[pos+2]) << 24) )>> 8
                         pos = pos+3
@@ -180,8 +188,8 @@ function readBDF(fid::IO; from::Real=0, to::Real=-1, channels::AbstractVector{In
     else
         for n=1:recordsToRead
             for c=1:nChannels
-                cIdx = coalesce(findfirst(isequal(c), channels), 0)
-                if (chanLabels[c] != "Status") & (cIdx != 0)
+                cIdx = findfirst(isequal(c), channels)
+                if (chanLabels[c] != "Status") & (cIdx != nothing)
                     for s=1:nSampRec[1]
                         data[cIdx,(n-1)*nSampRec[1]+s] = ((Int32(x[pos]) << 8) | (Int32(x[pos+1]) << 16) | (Int32(x[pos+2]) << 24) )>> 8
                         pos = pos+3

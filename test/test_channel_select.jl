@@ -30,3 +30,5 @@ for (chanLabs, chanNum) in zip((["A1", "A2"], ["A1", "A3"], ["A3", "A1", "A11", 
 
     @test statusChan2 == statusChan
 end
+
+@test_throws(ErrorException, readBDF(origFilePath, channels = ["Z1", "A2"]))
