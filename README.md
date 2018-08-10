@@ -1,4 +1,3 @@
-[![BDF](http://pkg.julialang.org/badges/BDF_0.5.svg)](http://pkg.julialang.org/?pkg=BDF)
 [![Build Status](https://travis-ci.org/sam81/BDF.jl.svg?branch=master)](https://travis-ci.org/sam81/BDF.jl)
 [![Coverage Status](https://coveralls.io/repos/github/sam81/BDF.jl/badge.svg?branch=master)](https://coveralls.io/github/sam81/BDF.jl?branch=master)
 
