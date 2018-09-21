@@ -1,3 +1,4 @@
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Build Status](https://travis-ci.org/sam81/BDF.jl.svg?branch=master)](https://travis-ci.org/sam81/BDF.jl)
 [![Coverage Status](https://coveralls.io/repos/github/sam81/BDF.jl/badge.svg?branch=master)](https://coveralls.io/github/sam81/BDF.jl?branch=master)
 
