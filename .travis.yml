@@ -8,7 +8,13 @@ julia:
     - nightly
 notifications:
     email: false
-
+addons:
+  apt:
+    packages:
+    - hdf5-tools
+  homebrew:
+    packages:
+    - hdf5
 matrix:
   allow_failures:
     - julia: nightly
