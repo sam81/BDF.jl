@@ -1,7 +1,7 @@
 name = "BDF"
 uuid = "4de61398-0c94-11ec-1711-35c2ab39c271"
-authors = ["Robert Luke <mail@robertluke.net>"]
-version = "1.0.0"
+authors = ["Samuele Carcagno"]
+version = "0.5.0"
 
 [deps]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
