@@ -1,0 +1,44 @@
+name: Tests Julia 1
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags: '*'
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number }}-${{ github.event.type }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    timeout-minutes: 45
+    name: ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - provider ${{ matrix.provider }} - ${{ matrix.threads }} thread(s)
+    runs-on: ${{ matrix.os }}
+    env:
+      JULIA_FFTW_PROVIDER: ${{ matrix.provider }}
+      JULIA_NUM_THREADS: ${{ matrix.threads }}
+      DATADEPS_ALWAYS_ACCEPT: true
+    strategy:
+      fail-fast: false
+      matrix:
+        provider:
+          - 'FFTW'
+        version:
+          - '1.6'
+        os:
+          - ubuntu-latest
+        threads:
+          - '1'
+        arch:
+          - x64
+
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: ${{ matrix.version }}
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-runtest@v1
